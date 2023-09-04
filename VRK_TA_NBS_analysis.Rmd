@@ -1,0 +1,922 @@
+---
+title: "Levers for transformative nature-based adaptation initiatives in the Alps"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r Libraries, warning=FALSE, include=FALSE}
+library(png)
+library(ggplot2)
+library(chron)
+library(lattice)
+library(ncdf4)
+library(adehabitatHR)
+library(corrplot)
+library(factoextra)
+library(FactoMineR)
+library(Rarity)
+library(RColorBrewer)
+library(grDevices)
+library(ade4)
+library(vegan)
+library(missMDA)
+library(lawstat)
+library(png)
+library(networkD3)
+library(tidyr)
+# source("C:/Users/dubot/Documents/LECA/M2/R/display_code.R")
+library(patchwork)
+library(lme4)
+library(rgl)
+
+```
+
+
+## Data
+```{r data}
+
+### Matrix
+Matrix_20IV=read.csv2("Matrix_VRK_TA_NBS.csv")
+colnames(Matrix_20IV)=c("NBS", colnames(Matrix_20IV)[-c(1)])
+
+if (nrow(Matrix_20IV)>20){
+  Matrix_20IV=Matrix_20IV[1:20,]
+}
+
+### Variable VRK typologie
+Var_cat=read.csv2("VRK_classification.csv")
+Var_cat$Var=as.factor(Var_cat$Var)
+Var_cat$Cat=as.factor(Var_cat$Cat)
+Var_cat=Var_cat[1:133,]
+
+
+for (j in 2:ncol(Matrix_20IV)){
+  for (i in 1:nrow(Matrix_20IV)){
+    if (is.na(Matrix_20IV[i,j])|Matrix_20IV[i,j]==''){
+      Matrix_20IV[i,j]=0}  }
+}
+
+# Transform all 0,5 and 2 in 1 for test
+for (j in 2:ncol(Matrix_20IV)){
+  for (i in 1:nrow(Matrix_20IV)){
+    if (Matrix_20IV[i,j]==0.5){
+      Matrix_20IV[i,j]=1}
+    if (Matrix_20IV[i,j]=="0,5"){
+      Matrix_20IV[i,j]=1}
+    if (Matrix_20IV[i,j]==2){
+      Matrix_20IV[i,j]=1}
+    if (Matrix_20IV[i,j]==-0.5){
+      Matrix_20IV[i,j]=-1}
+    if (Matrix_20IV[i,j]==-2){
+      Matrix_20IV[i,j]=-1}
+      
+  }
+  
+}
+
+Matrix_20IV_sans_chr=Matrix_20IV
+Var_chr=c()
+
+for (i in 2:ncol(Matrix_20IV_sans_chr)){
+  if (is.character(Matrix_20IV_sans_chr[,i])){
+    Var_chr=c(Var_chr,i)
+  }
+}
+Matrix_20IV_sans_chr_sans_chr=Matrix_20IV_sans_chr[,-Var_chr]
+
+# ## Var_levers
+
+
+Var_with_0=c()
+Var_with_1=c()
+Var_with_2=c()
+
+Sum_col_Matrix=apply(Matrix_20IV_sans_chr_sans_chr[,2:ncol(Matrix_20IV_sans_chr_sans_chr)], 2, 'sum')
+
+Var_with_0=c(Var_with_0,colnames(Matrix_20IV_sans_chr_sans_chr[grep(0, Sum_col_Matrix)]))
+
+Var_with_1=c(Var_with_1,colnames(Matrix_20IV_sans_chr_sans_chr[grep(1, Sum_col_Matrix)]))
+
+Var_with_2=c(Var_with_2,colnames(Matrix_20IV_sans_chr_sans_chr[grep(2, Sum_col_Matrix)]))
+
+# Transform into factor
+for (i in 2:ncol(Matrix_20IV)){
+  
+  if (("1" %in% Matrix_20IV[,i])|("-1" %in% Matrix_20IV[,i])|("No" %in% Matrix_20IV[,i])|("Few" %in% Matrix_20IV[,i])){
+  if ((("1" %in% Matrix_20IV[,i])|("-1" %in% Matrix_20IV[,i]))){
+  Matrix_20IV[,i]=factor(Matrix_20IV[,i], ordered = T, levels = c("-1", "0", "1"))}
+  if (i==grep("Required.funding", colnames(Matrix_20IV))[1]){
+    Matrix_20IV[,i]=factor(Matrix_20IV[,i], ordered = T, levels = c("No", "Unlikely", "Likely", "Yes"))
+  
+  }
+  if (i==grep("Incentives", colnames(Matrix_20IV))[1]){
+    Matrix_20IV[,i]=factor(Matrix_20IV[,i], ordered = T, levels = c("No", "Few", "Fully"))
+  }
+  
+  if (i==grep("Bureaucracy", colnames(Matrix_20IV))[1]){
+    Matrix_20IV[,i]=factor(Matrix_20IV[,i], ordered = T, levels = c("Few", "0", "Hard"))
+  }
+
+  } else{Matrix_20IV[,i]=as.factor(Matrix_20IV[,i])}
+  
+  
+}
+
+### MCA without TA
+TA_Var=c("RPN", "RES", "PS", "SW", "I", "MSN", "MSC", "P")
+
+# Change "Pilot site" to "small" in Multiscale:
+Matrix_20IV[which(Matrix_20IV$SW=="Pilot site"),"SW"]=as.factor("Small")
+
+
+# Get the VRK for each variables
+
+Var_cat$Var=gsub(" ", ".", Var_cat$Var)
+Var_cat$Var=gsub("’", ".", Var_cat$Var)
+Var_cat$Var=gsub("-", ".", Var_cat$Var)
+Var_cat$Var=gsub("/", ".", Var_cat$Var)
+Cat_var_clean=Var_cat[which(Var_cat$Var %in% colnames(Matrix_20IV)),]
+
+
+
+# Get the lever or barrier for each variables
+type_var_clean=data.frame(Var=Cat_var_clean$Var, Type=factor("Categorised", levels=c("Categorised", "Lever", "Barrier", "Mixed")))
+for (i in 1:nrow(type_var_clean)){
+  if (("1" %in% Matrix_20IV[,grep(type_var_clean[i,1], colnames(Matrix_20IV))])&("-1" %in% Matrix_20IV[,grep(type_var_clean[i,1], colnames(Matrix_20IV))])){
+    type_var_clean[i,2]="Mixed"
+  }
+  if (("1" %in% Matrix_20IV[,grep(type_var_clean[i,1], colnames(Matrix_20IV))])&(type_var_clean[i,2]!="Mixed")){
+    type_var_clean[i,2]="Lever"
+  }
+  if (("-1" %in% Matrix_20IV[,grep(type_var_clean[i,1], colnames(Matrix_20IV))])&(type_var_clean[i,2]!="Mixed")){
+    type_var_clean[i,2]="Barrier"
+  }
+  
+}
+
+ summary(type_var_clean)
+
+
+```
+
+
+## Multiple Correspondence Analysis (MCA)
+
+```{r MCA}
+
+MCA_20VRK=Matrix_20IV
+
+rownames(MCA_20VRK)=MCA_20VRK$NBS
+
+MCA_20VRK=MCA_20VRK[,-1]
+
+# Ordering TA variable
+          
+MCA_20VRK$RPN=factor(MCA_20VRK$RPN, ordered = T, levels = c("No", "Instrumental values", "Relational values","Intrinsic values"))
+
+
+MCA_20VRK$RES=factor(MCA_20VRK$RES, ordered = T, levels = c("No", "Change of species", "Change in species richness", "Change in landscape connectivity", "Change in land-cover", "Change in NCP"))
+
+
+MCA_20VRK$PS=factor(MCA_20VRK$PS, ordered = T, levels = c("Business-as-usual", "Gradual change in practices", "Radical change in practices", "Change in social relationships", "Integrated vision of the system"))
+
+
+MCA_20VRK$SW=factor(MCA_20VRK$SW, ordered = T, levels = c("Small", "Municipalities", "Interregional"))
+
+
+MCA_20VRK$I=factor(MCA_20VRK$I, ordered = T, levels = c("New species", "Known elsewhere", "Known alternative", "Known experiments", "Never seen before"))
+
+
+MCA_20VRK$MSN=factor(MCA_20VRK$MSN, levels=c(levels(as.factor(MCA_20VRK$MSN)), "ITD"))
+MCA_20VRK$MSN[which(MCA_20VRK$MSN=="Interdisciplinarity" |MCA_20VRK$MSN=="Transdisciplinarity" )]=factor("ITD")
+MCA_20VRK$MSN=factor(MCA_20VRK$MSN, ordered=T, levels=c("Single disciplinary", "Fostering interdisciplinarity", "ITD" ))
+
+
+MCA_20VRK$MSC=factor(MCA_20VRK$MSC, ordered = T, levels = c("Peer-to-peer", "Fostering collaboration", "Private-private partnership", "Public-private partnership", "Co-design"))
+
+
+
+### Change Planned to, funding and policy-dependent to "context-dependent"
+
+MCA_20VRK$P=factor(MCA_20VRK$P, levels=c(levels(MCA_20VRK$P), "Context-dependent"))
+
+MCA_20VRK$P[which(MCA_20VRK$P=="Funding-dependent" |MCA_20VRK$P=="Policy-dependent" |MCA_20VRK$P=="Planned to")]=factor("Context-dependent")
+# MCA_20VRK$P=factor(MCA_20VRK$MSC)
+MCA_20VRK$P=factor(MCA_20VRK$P, ordered = T, levels = c("Aborted", "Methods", "Context-dependent", "Adaptable"))
+
+
+
+
+#MCA with all and quali.sup
+
+
+res.mca20 <- MCA(MCA_20VRK,
+              graph=FALSE,
+              quali.sup = c(72:ncol(MCA_20VRK))) 
+res.var20=res.mca20$var
+res.ind20=res.mca20$ind
+
+
+# with VRK
+Cat_var_factor=data.frame(Var=NA, Cat=NA)
+compteur=1
+for (i in 1:nrow(Cat_var_clean)){
+# for (i in 1:(grep("TA", Cat_var_clean$Cat)[1]-1)){
+    
+  var_i=grep(Cat_var_clean[i,1], rownames(res.mca20$var$coord))
+  if (length(var_i)>0){
+  for (j in 1:length(var_i)){
+
+    Cat_var_factor=rbind(Cat_var_factor,c(rownames(res.mca20$var$coord)[var_i[j]], as.character(Cat_var_clean[i,2])))
+    compteur=compteur+1
+  }}
+}
+
+
+Cat_var_factor=Cat_var_factor[-1,]
+
+
+Cat_var_factor=Cat_var_factor[1:nrow(res.mca20$var$coord),]
+
+Cat_var_factor[149:nrow(res.mca20$var$coord),1]=rownames(res.mca20$var$coord)[149:nrow(res.mca20$var$coord)]
+Cat_var_factor[149:nrow(res.mca20$var$coord),2]="TA"
+Cat_var_factor$Cat=as.factor(Cat_var_factor$Cat)
+
+
+
+```
+
+## Transformative adaptation chracteristics
+
+```{r mca_ta_only}
+MCA_TA=MCA_20VRK
+
+rownames(MCA_TA)=rownames(MCA_20VRK)
+
+
+
+### MCA without TA
+TA_Var=c("RPN", "RES", "PS", "SW", "I", "MSN", "MSC", "P")
+
+
+MCA_TA=MCA_TA[,c(64:ncol(MCA_TA))]
+
+### Boxplot TA characteristics
+
+MCA_TA_only=MCA_TA[,c(1:8)]
+
+MCA_TA_only_bx=MCA_TA_only
+for (i in 1:ncol(MCA_TA_only_bx)){
+  MCA_TA_only_bx[,i]=as.character(MCA_TA_only_bx[,i])
+  
+}
+#RPN: 0 1 2 3 => 0 5/3 10/3 5
+#No < Instrumental values < Relational values < Intrinsic values
+MCA_TA_only_bx$RPN[which(as.character(MCA_TA_only$RPN)==("No"))]=0
+MCA_TA_only_bx$RPN[which(as.character(MCA_TA_only$RPN)==("Instrumental values"))]=5/3
+MCA_TA_only_bx$RPN[which(as.character(MCA_TA_only$RPN)==("Relational values"))]=10/3
+MCA_TA_only_bx$RPN[which(as.character(MCA_TA_only$RPN)==("Intrinsic values"))]=5
+
+#RES: 0 1 2 3 4 5 => same
+#  "No"   "Change of species" "Change in species richness" 
+# "Change in landscape connectivity" "Change in land-cover""Change in NCP"  
+MCA_TA_only_bx$RES[which(as.character(MCA_TA_only$RES)==("No"))]=0
+MCA_TA_only_bx$RES[which(as.character(MCA_TA_only$RES)==("Change of species"))]=1
+MCA_TA_only_bx$RES[which(as.character(MCA_TA_only$RES)==("Change in species richness"))]=2
+MCA_TA_only_bx$RES[which(as.character(MCA_TA_only$RES)==("Change in landscape connectivity"))]=3
+MCA_TA_only_bx$RES[which(as.character(MCA_TA_only$RES)==("Change in land-cover"))]=4
+MCA_TA_only_bx$RES[which(as.character(MCA_TA_only$RES)==("Change in NCP"))]=5
+
+#PS: 0 1 2 3 4 => 0 1 2.333.66  5 
+# "Business-as-usual"  "Gradual change in practices"
+# "Radical change in practices"     "Change in social relationships" 
+# "Integrated vision of the system"
+MCA_TA_only_bx$PS[which(as.character(MCA_TA_only$PS)==("Business-as-usual"))]=0
+MCA_TA_only_bx$PS[which(as.character(MCA_TA_only$PS)==("Gradual change in practices"))]=1
+MCA_TA_only_bx$PS[which(as.character(MCA_TA_only$PS)==("Radical change in practices"))]=7/3
+MCA_TA_only_bx$PS[which(as.character(MCA_TA_only$PS)==("Change in social relationships"))]=11/3
+MCA_TA_only_bx$PS[which(as.character(MCA_TA_only$PS)==("Integrated vision of the system"))]=5
+
+#SW: 1 2 3 => 1 3 5
+#Small < Municipalities < Interregional
+MCA_TA_only_bx$SW[which(as.character(MCA_TA_only$SW)==("Small"))]=1
+MCA_TA_only_bx$SW[which(as.character(MCA_TA_only$SW)==("Municipalities"))]=3
+MCA_TA_only_bx$SW[which(as.character(MCA_TA_only$SW)==("Interregional"))]=5
+
+#I: 1 2 3 4 5 => same 
+#"New species" "Known elsewhere" "Known alternative" "Known experiments" "Never seen before"
+MCA_TA_only_bx$I[which(as.character(MCA_TA_only$I)==("New species"))]=1
+MCA_TA_only_bx$I[which(as.character(MCA_TA_only$I)==("Known elsewhere"))]=2
+MCA_TA_only_bx$I[which(as.character(MCA_TA_only$I)==("Known alternative"))]=3
+MCA_TA_only_bx$I[which(as.character(MCA_TA_only$I)==("Known experiments"))]=4
+MCA_TA_only_bx$I[which(as.character(MCA_TA_only$I)==("Never seen before"))]=5
+
+
+
+#MSN: 0 1 2 => 0 2.5 5
+#"Single disciplinary"           "Fostering interdisciplinarity" "ITD"    
+MCA_TA_only_bx$MSN[which(as.character(MCA_TA_only$MSN)==("Single disciplinary"))]=0
+MCA_TA_only_bx$MSN[which(as.character(MCA_TA_only$MSN)==("Fostering interdisciplinarity"))]=1
+MCA_TA_only_bx$MSN[which(as.character(MCA_TA_only$MSN)==("ITD"))]=5
+
+#MSC: 1 2 3 4 5 => same
+# "Peer-to-peer" "Fostering collaboration" "Private-private partnership"
+# "Public-private partnership"  "Co-design"
+MCA_TA_only_bx$MSC[which(as.character(MCA_TA_only$MSC)==("Peer-to-peer"))]=1
+MCA_TA_only_bx$MSC[which(as.character(MCA_TA_only$MSC)==("Fostering collaboration"))]=2
+MCA_TA_only_bx$MSC[which(as.character(MCA_TA_only$MSC)==("Private-private partnership"))]=3
+MCA_TA_only_bx$MSC[which(as.character(MCA_TA_only$MSC)==("Public-private partnership"))]=4
+MCA_TA_only_bx$MSC[which(as.character(MCA_TA_only$MSC)==("Co-design"))]=5
+
+
+#P: 0 1 2 3 => 0 2 4 6
+# "Aborted" "Methods" "Context-dependent" "Adaptable" 
+MCA_TA_only_bx$P[which(as.character(MCA_TA_only$P)==("Aborted"))]=0
+MCA_TA_only_bx$P[which(as.character(MCA_TA_only$P)==("Methods"))]=1
+MCA_TA_only_bx$P[which(as.character(MCA_TA_only$P)==("Context-dependent"))]=3
+MCA_TA_only_bx$P[which(as.character(MCA_TA_only$P)==("Adaptable"))]=5
+
+
+# Boxplot
+for (i in 1:ncol(MCA_TA_only_bx)){
+  MCA_TA_only_bx[,i]=as.numeric(MCA_TA_only_bx[,i])
+  
+}
+
+
+
+
+MCA_bx_long=matrix(nrow=8*20, ncol=3)
+MCA_bx_long=as.data.frame(MCA_bx_long)
+
+## Graphs are plotted after the clustering analysis
+
+
+```
+
+
+
+## Clustering analysis
+
+```{r clustering}
+
+res.mca20_sans_supp=MCA(MCA_20VRK[,1:71],
+              graph=FALSE) 
+HC20_mca3=HCPC(res.mca20_sans_supp, metric="euclidean", nb.clust=3, graph=F)
+
+
+## Achieve the boxplot of the TA characteristics
+for (i in 1:8){
+  MCA_bx_long$X[(20*(i-1)+1):(20*i)]=rep(colnames(MCA_TA_only_bx)[i],20)
+  MCA_bx_long$Y[(20*(i-1)+1):(20*i)]=MCA_TA_only_bx[,i]
+  MCA_bx_long$NBS[(20*(i-1)+1):(20*i)]=HC20_mca3$data.clust$clust
+}
+
+p=ggplot(MCA_bx_long) + geom_violin(aes(x=X, y=Y), alpha = 0.5) + geom_dotplot(aes(x=X, y=Y, fill=factor(NBS)),binwidth=0.2, binaxis='y', stackdir='center', dotsize=0.4) + theme_classic() + coord_flip()
+print(p)
+
+### Now clusters
+
+###########################
+#######  C1 - GD  #########
+###########################
+HC20_1=as.data.frame(HC20_mca3$desc.var$category$`1`)
+HC20_1$Levers=rownames(HC20_1)
+HC20_1$Signif=" "
+HC20_1$Signif[which(HC20_1$p.value<0.1)]="*"
+HC20_1$Signif[which(HC20_1$p.value<0.02)]="**"
+HC20_1$Signif[which(HC20_1$p.value<0.01)]="***"
+
+HC20_1$Side=1
+HC20_1$Side[which(HC20_1$v.test<0)]=-1
+HC20_1$Side=as.factor(HC20_1$Side)
+
+
+###########################
+#######  C2 - MC  #########
+###########################
+HC20_2=as.data.frame(HC20_mca3$desc.var$category$`2`)
+HC20_2$Levers=rownames(HC20_2)
+
+
+HC20_2$Signif=" "
+HC20_2$Signif[which(HC20_2$p.value<0.1)]="*"
+HC20_2$Signif[which(HC20_2$p.value<0.02)]="**"
+HC20_2$Signif[which(HC20_2$p.value<0.01)]="***"
+
+HC20_2$Side=1
+HC20_2$Side[which(HC20_2$v.test<0)]=-1
+HC20_2$Side=as.factor(HC20_2$Side)
+
+
+###########################
+#######  C3 - LT  #########
+###########################
+HC20_3=as.data.frame(HC20_mca3$desc.var$category$`3`)
+HC20_3$Levers=rownames(HC20_3)
+
+HC20_3$Signif=" "
+HC20_3$Signif[which(HC20_3$p.value<0.1)]="*"
+HC20_3$Signif[which(HC20_3$p.value<0.02)]="**"
+HC20_3$Signif[which(HC20_3$p.value<0.01)]="***"
+
+HC20_3$Side=1
+HC20_3$Side[which(HC20_3$v.test<0)]=-1
+HC20_3$Side=as.factor(HC20_3$Side)
+
+#### Cluster 3    (n=8)                                      Cla/Mod   
+# Ellipse clusters
+p=fviz_ellipses (res.mca20, HC20_mca3$data.clust$clust, axes=c(1,2))
+print(p)
+p=fviz_ellipses (res.mca20, HC20_mca3$data.clust$clust, axes=c(1,3))
+print(p)
+
+```
+
+
+
+## Levers and barriers
+
+```{r barplots_levers_barriers, warning=FALSE}
+
+Matrix_20IV_scaling=Matrix_20IV[,1:64]
+Matrix_20IV_scaling=Matrix_20IV_scaling[,-grep("Required.funding", colnames(Matrix_20IV_scaling))]
+
+rownames(Matrix_20IV_scaling)=Matrix_20IV_scaling$NBS
+Matrix_20IV_scaling$Incentives=0
+Matrix_20IV_scaling$Incentives[which(Matrix_20IV$Incentives!="No")]=1
+Matrix_20IV_scaling$Networking.activities=factor(Matrix_20IV_scaling$Networking.activities, levels=c(0,1))
+Matrix_20IV_scaling$Networking.activities[which(is.na(Matrix_20IV_scaling$Networking.activities))]=1
+
+Matrix_20IV_scaling$Bureaucracy=factor(0, levels=c(-1,0))
+Matrix_20IV_scaling$Bureaucracy[which(Matrix_20IV$Bureaucracy!=0)]=-1
+Matrix_20IV_scaling=Matrix_20IV_scaling[,-2]
+
+type_var_20IV=data.frame(Var=colnames(Matrix_20IV_scaling), Type=factor("Categorised", levels=c("Categorised", "Lever", "Barrier", "Mixed")))
+for (i in 1:nrow(type_var_20IV)){
+  if (("1" %in% Matrix_20IV_scaling[,grep(type_var_20IV[i,1], colnames(Matrix_20IV_scaling))])&("-1" %in% Matrix_20IV_scaling[,grep(type_var_20IV[i,1], colnames(Matrix_20IV_scaling))])){
+    type_var_20IV[i,2]="Mixed"
+  }
+  if (("1" %in% Matrix_20IV_scaling[,grep(type_var_20IV[i,1], colnames(Matrix_20IV_scaling))])&(type_var_20IV[i,2]!="Mixed")){
+    type_var_20IV[i,2]="Lever"
+  }
+  if (("-1" %in% Matrix_20IV_scaling[,grep(type_var_20IV[i,1], colnames(Matrix_20IV_scaling))])&(type_var_20IV[i,2]!="Mixed")){
+    type_var_20IV[i,2]="Barrier"
+  }
+  
+}
+
+type_var_20IV=type_var_20IV[-1,]
+summary(type_var_20IV$Type)
+
+
+Levers_IV20=Matrix_20IV_scaling
+rownames(Levers_IV20)=Levers_IV20$NBS
+for (i in 1:ncol(Levers_IV20)){
+    if (-1 %in% Levers_IV20[,i]){
+      Levers_IV20[which(Levers_IV20[,i]==-1),i]=0
+  }
+}
+
+Barriers_IV20=Matrix_20IV_scaling
+rownames(Barriers_IV20)=Barriers_IV20$NBS
+for (i in 1:ncol(Barriers_IV20)){
+  if (1 %in% Barriers_IV20[,i]){
+    Barriers_IV20[which(Barriers_IV20[,i]==1),i]=0
+  }
+}
+
+
+
+# Levers
+Levers_IV20_1=Levers_IV20[which(Levers_IV20$NBS %in% rownames(HC20_mca3$data.clust[which(HC20_mca3$data.clust$clust==1),])),]
+rownames(Levers_IV20_1)=Levers_IV20_1$NBS
+Levers_IV20_1=Levers_IV20_1[,-1]
+
+Levers_IV20_2=Levers_IV20[which(Levers_IV20$NBS %in% rownames(HC20_mca3$data.clust[which(HC20_mca3$data.clust$clust==2),])),]
+rownames(Levers_IV20_2)=Levers_IV20_2$NBS
+Levers_IV20_2=Levers_IV20_2[,-1]
+
+Levers_IV20_3=Levers_IV20[which(Levers_IV20$NBS %in% rownames(HC20_mca3$data.clust[which(HC20_mca3$data.clust$clust==3),])),]
+rownames(Levers_IV20_3)=Levers_IV20_3$NBS
+Levers_IV20_3=Levers_IV20_3[,-1]
+
+
+# Barriers
+Barriers_IV20_1=Barriers_IV20[which(Barriers_IV20$NBS %in% rownames(HC20_mca3$data.clust[which(HC20_mca3$data.clust$clust==1),])),]
+rownames(Barriers_IV20_1)=Barriers_IV20_1$NBS
+Barriers_IV20_1=Barriers_IV20_1[,-1]
+
+Barriers_IV20_2=Barriers_IV20[which(Barriers_IV20$NBS %in% rownames(HC20_mca3$data.clust[which(HC20_mca3$data.clust$clust==2),])),]
+rownames(Barriers_IV20_2)=Barriers_IV20_2$NBS
+Barriers_IV20_2=Barriers_IV20_2[,-1]
+
+Barriers_IV20_3=Barriers_IV20[which(Barriers_IV20$NBS %in% rownames(HC20_mca3$data.clust[which(HC20_mca3$data.clust$clust==3),])),]
+rownames(Barriers_IV20_3)=Barriers_IV20_3$NBS
+Barriers_IV20_3=Barriers_IV20_3[,-1]
+
+
+
+Data_LB20_by_clusters=data.frame(Var=colnames(Matrix_20IV_scaling)[-1], LV1=NA, LV2=NA, LV3=NA, BA1=NA, BA2=NA, BA3=NA)
+
+for (i in 1:nrow(Data_LB20_by_clusters)){
+  Data_LB20_by_clusters$LV1[i]=nrow(Levers_IV20_1)-nrow(Levers_IV20_1[which(Levers_IV20_1[,i]==0),])
+  Data_LB20_by_clusters$LV2[i]=nrow(Levers_IV20_2)-nrow(Levers_IV20_2[which(Levers_IV20_2[,i]==0),])
+  Data_LB20_by_clusters$LV3[i]=nrow(Levers_IV20_3)-nrow(Levers_IV20_3[which(Levers_IV20_3[,i]==0),])
+    
+  Data_LB20_by_clusters$BA1[i]=nrow(Barriers_IV20_1)-nrow(Barriers_IV20_1[which(Barriers_IV20_1[,i]==0),])
+  Data_LB20_by_clusters$BA2[i]=nrow(Barriers_IV20_2)-nrow(Barriers_IV20_2[which(Barriers_IV20_2[,i]==0),])
+  Data_LB20_by_clusters$BA3[i]=nrow(Barriers_IV20_3)-nrow(Barriers_IV20_3[which(Barriers_IV20_3[,i]==0),])
+
+  }
+
+
+
+Data_LB20_by_clusters$LVtot=apply(Data_LB20_by_clusters[,2:4],1,'sum' )
+Data_LB20_by_clusters$BAtot=apply(Data_LB20_by_clusters[,5:7],1,'sum' )
+Data_LB20_by_clusters=Data_LB20_by_clusters[order(Data_LB20_by_clusters$LVtot, decreasing = T),]
+
+BA_to_order=Data_LB20_by_clusters[grep("^0", as.character(Data_LB20_by_clusters$LVtot))[1]:nrow(Data_LB20_by_clusters),]
+BA_to_order=BA_to_order[order(BA_to_order$BAtot, decreasing = T),]
+
+Data_LB20_by_clusters[grep("^0", as.character(Data_LB20_by_clusters$LVtot))[1]:nrow(Data_LB20_by_clusters),]=BA_to_order
+
+Data_LB20_by_clusters$TOT=Data_LB20_by_clusters$LVtot+Data_LB20_by_clusters$BAtot
+
+Data_LB20_by_clusters$BA1=-Data_LB20_by_clusters$BA1
+Data_LB20_by_clusters$BA2=-Data_LB20_by_clusters$BA2
+Data_LB20_by_clusters$BA3=-Data_LB20_by_clusters$BA3
+Data_LB20_by_clusters$BAtot=-Data_LB20_by_clusters$BAtot
+
+```
+
+### Levers and barriers barplot
+
+```{r plot_tot, warning=FALSE}
+### To do order by number of mention (TOT)
+
+Data_LB20_by_clusters_order=Data_LB20_by_clusters[order(Data_LB20_by_clusters$TOT, decreasing = T),]
+
+
+###### Need to reshape data
+##### Levers
+Data_LV20_by_clusters_reshape=reshape(Data_LB20_by_clusters_order[,1:4],
+                               varying = c("LV1", "LV2", "LV3"),
+                               v.names = "LV",
+                               timevar = "cluster",
+                               direction = "long",
+                               idvar="Var")
+Data_LV20_by_clusters_reshape$cluster[which(Data_LV20_by_clusters_reshape$cluster==1)]="Green deal"
+Data_LV20_by_clusters_reshape$cluster[which(Data_LV20_by_clusters_reshape$cluster==2)]="Multi-scale co-production"
+Data_LV20_by_clusters_reshape$cluster[which(Data_LV20_by_clusters_reshape$cluster==3)]="Local transformation"
+
+Data_LV20_by_clusters_reshape$cluster=as.factor(Data_LV20_by_clusters_reshape$cluster)
+Data_LV20_by_clusters_reshape$Var=factor(Data_LV20_by_clusters_reshape$Var, levels=Data_LB20_by_clusters_order$Var)
+
+Data_BA20_by_clusters_reshape=reshape(Data_LB20_by_clusters_order[,c(1,5:7)],
+                               varying = c("BA1", "BA2", "BA3"),
+                               v.names = "BA",
+                               timevar = "cluster",
+                               direction = "long",
+                               idvar="Var")
+
+Data_BA20_by_clusters_reshape$cluster[which(Data_BA20_by_clusters_reshape$cluster==1)]="Green deal"
+Data_BA20_by_clusters_reshape$cluster[which(Data_BA20_by_clusters_reshape$cluster==2)]="Multi-scale co-production"
+Data_BA20_by_clusters_reshape$cluster[which(Data_BA20_by_clusters_reshape$cluster==3)]="Local transformation"
+
+Data_BA20_by_clusters_reshape$cluster=as.factor(Data_BA20_by_clusters_reshape$cluster)
+Data_BA20_by_clusters_reshape$Var=factor(Data_BA20_by_clusters_reshape$Var, levels=Data_LB20_by_clusters_order$Var)
+
+
+
+Data_plot_order=Data_LV20_by_clusters_reshape
+Data_plot_order$BA=Data_BA20_by_clusters_reshape$BA
+
+#### chi2 LB
+
+
+# Without differences between levers and barriers
+Data_LB20_by_clusters_order_chi2=Data_LB20_by_clusters_order
+Data_LB20_by_clusters_order_chi2[,5:7]=-Data_LB20_by_clusters_order_chi2[,5:7]
+chi2_LV_BA20_order=data.frame(Var=(Data_LB20_by_clusters_order_chi2$Var), chi2=NA)
+for (i in 1:nrow(Data_LB20_by_clusters_order_chi2)){
+    chi2_LV_BA20_order$chi2[i]=chisq.test(Data_LB20_by_clusters_order_chi2[i,2:7])$p.value
+}
+chi2_LV_BA20_order$signif=NA
+for (i in 1:nrow(chi2_LV_BA20_order)){
+  if (chi2_LV_BA20_order$chi2[i]<0.1){
+    chi2_LV_BA20_order$signif[i]="*"
+  }
+  if (chi2_LV_BA20_order$chi2[i]<0.05){
+    chi2_LV_BA20_order$signif[i]="**"
+  }
+  if (chi2_LV_BA20_order$chi2[i]<0.001){
+    chi2_LV_BA20_order$signif[i]="***"
+  }
+}
+
+
+# With different chi2 test for levers and for barriers
+chi2_LV_BA20_diff_order=data.frame(LB=Data_LB20_by_clusters_order$Var, LVchi2=NA, BAchi2=NA)
+for (i in 1:nrow(Data_LB20_by_clusters_order)){
+  if (F %in% (Data_LB20_by_clusters_order[i,2:4]==c(0,0,0))){
+  chi2_LV_BA20_diff_order$LVchi2[i]=chisq.test(Data_LB20_by_clusters_order[i,2:4])$p.value}
+  if (F %in% (Data_LB20_by_clusters_order[i,5:7]==c(0,0,0))){
+  chi2_LV_BA20_diff_order$BAchi2[i]=chisq.test(-Data_LB20_by_clusters_order[i,5:7])$p.value
+}}
+chi2_LV_BA20_diff_order$LVsignif=NA
+chi2_LV_BA20_diff_order$BAsignif=NA
+for (i in 1:nrow(chi2_LV_BA20_diff_order)){
+  if (is.na(chi2_LV_BA20_diff_order$LVchi2[i])==F){
+  if (chi2_LV_BA20_diff_order$LVchi2[i]<0.1){
+    chi2_LV_BA20_diff_order$LVsignif[i]="*"
+  }
+  if (chi2_LV_BA20_diff_order$LVchi2[i]<0.05){
+    chi2_LV_BA20_diff_order$LVsignif[i]="**"
+  }
+  if (chi2_LV_BA20_diff_order$LVchi2[i]<0.001){
+    chi2_LV_BA20_diff_order$LVsignif[i]="***"
+  }}
+}
+
+for (i in 1:nrow(chi2_LV_BA20_diff_order)){
+  if (is.na(chi2_LV_BA20_diff_order$BAchi2[i])==F){
+  if (chi2_LV_BA20_diff_order$BAchi2[i]<0.1){
+    chi2_LV_BA20_diff_order$BAsignif[i]="*"
+  }
+  if (chi2_LV_BA20_diff_order$BAchi2[i]<0.05){
+    chi2_LV_BA20_diff_order$BAsignif[i]="**"
+  }
+  if (chi2_LV_BA20_diff_order$BAchi2[i]<0.001){
+    chi2_LV_BA20_diff_order$BAsignif[i]="***"
+  }}
+} 
+
+ 
+p=ggplot(Data_plot_order) + geom_bar(aes(x=Var, y=LV, fill=cluster ), stat="identity") + geom_bar(aes(x=Var, y=BA, fill=cluster ), stat="identity") + labs(y=NULL, x=NULL) + coord_flip() + scale_fill_grey(start = 0.7, end = 0.3)+ theme_minimal() + 
+  annotate("text", x=1:nrow(Data_LB20_by_clusters_order), y=apply(Data_LB20_by_clusters_order[,2:4], 1, 'sum')+1.5, label=chi2_LV_BA20_diff_order$LVsignif) + 
+  annotate("text", x=1:nrow(Data_LB20_by_clusters_order), y=apply(Data_LB20_by_clusters_order[,5:7], 1, 'sum')-1.5, label=chi2_LV_BA20_diff_order$BAsignif)
+
+print(p)
+
+
+
+
+
+
+```
+
+
+## Amplification
+
+```{r amplification_barplots, warning=F}
+
+NB20_scaling=Matrix_20IV[,c(1,73:ncol(Matrix_20IV))]
+rownames(NB20_scaling)=NB20_scaling$NBS
+
+
+Cat_var_scaling=data.frame(Var=colnames(NB20_scaling)[-1], Cat="Lever")
+for (i in 1:nrow(Cat_var_scaling)){
+  if ("-1" %in% NB20_scaling[,i+1]){
+    if ("1" %in% NB20_scaling[,i+1]){
+      Cat_var_scaling$Cat[i]="Mixed"
+    }
+    else{Cat_var_scaling$Cat[i]="Barrier"}
+  }
+  
+}
+Cat_var_scaling$Cat=as.factor(Cat_var_scaling$Cat)
+
+
+type_scaling_20IV=data.frame(Var=colnames(NB20_scaling), Type=factor("Categorised", levels=c("Categorised", "Lever", "Barrier", "Mixed")))
+for (i in 1:nrow(type_scaling_20IV)){
+  if (("1" %in% NB20_scaling[,grep(type_scaling_20IV[i,1], colnames(NB20_scaling))])&("-1" %in% NB20_scaling[,grep(type_scaling_20IV[i,1], colnames(NB20_scaling))])){
+    type_scaling_20IV[i,2]="Mixed"
+  }
+  if (("1" %in% NB20_scaling[,grep(type_scaling_20IV[i,1], colnames(NB20_scaling))])&(type_scaling_20IV[i,2]!="Mixed")){
+    type_scaling_20IV[i,2]="Lever"
+  }
+  if (("-1" %in% NB20_scaling[,grep(type_scaling_20IV[i,1], colnames(NB20_scaling))])&(type_scaling_20IV[i,2]!="Mixed")){
+    type_scaling_20IV[i,2]="Barrier"
+  }
+  
+}
+
+
+
+LV_scaling_IV20=NB20_scaling
+rownames(LV_scaling_IV20)=LV_scaling_IV20$NBS
+for (i in 1:ncol(LV_scaling_IV20)){
+    if (-1 %in% LV_scaling_IV20[,i]){
+      LV_scaling_IV20[which(LV_scaling_IV20[,i]==-1),i]=0
+  }
+}
+
+BA_scaling_IV20=NB20_scaling
+rownames(BA_scaling_IV20)=BA_scaling_IV20$NBS
+for (i in 1:ncol(BA_scaling_IV20)){
+  if (1 %in% BA_scaling_IV20[,i]){
+    BA_scaling_IV20[which(BA_scaling_IV20[,i]==1),i]=0
+  }
+}
+
+
+
+# Levers
+LV_scaling_IV20_1=LV_scaling_IV20[which(LV_scaling_IV20$NBS %in% rownames(HC20_mca3$data.clust[which(HC20_mca3$data.clust$clust==1),])),]
+rownames(LV_scaling_IV20_1)=LV_scaling_IV20_1$NBS
+LV_scaling_IV20_1=LV_scaling_IV20_1[,-1]
+
+LV_scaling_IV20_2=LV_scaling_IV20[which(LV_scaling_IV20$NBS %in% rownames(HC20_mca3$data.clust[which(HC20_mca3$data.clust$clust==2),])),]
+rownames(LV_scaling_IV20_2)=LV_scaling_IV20_2$NBS
+LV_scaling_IV20_2=LV_scaling_IV20_2[,-1]
+
+LV_scaling_IV20_3=LV_scaling_IV20[which(LV_scaling_IV20$NBS %in% rownames(HC20_mca3$data.clust[which(HC20_mca3$data.clust$clust==3),])),]
+rownames(LV_scaling_IV20_3)=LV_scaling_IV20_3$NBS
+LV_scaling_IV20_3=LV_scaling_IV20_3[,-1]
+
+
+# Barriers
+BA_scaling_IV20_1=BA_scaling_IV20[which(BA_scaling_IV20$NBS %in% rownames(HC20_mca3$data.clust[which(HC20_mca3$data.clust$clust==1),])),]
+rownames(BA_scaling_IV20_1)=BA_scaling_IV20_1$NBS
+BA_scaling_IV20_1=BA_scaling_IV20_1[,-1]
+
+BA_scaling_IV20_2=BA_scaling_IV20[which(BA_scaling_IV20$NBS %in% rownames(HC20_mca3$data.clust[which(HC20_mca3$data.clust$clust==2),])),]
+rownames(BA_scaling_IV20_2)=BA_scaling_IV20_2$NBS
+BA_scaling_IV20_2=BA_scaling_IV20_2[,-1]
+
+BA_scaling_IV20_3=BA_scaling_IV20[which(BA_scaling_IV20$NBS %in% rownames(HC20_mca3$data.clust[which(HC20_mca3$data.clust$clust==3),])),]
+rownames(BA_scaling_IV20_3)=BA_scaling_IV20_3$NBS
+BA_scaling_IV20_3=BA_scaling_IV20_3[,-1]
+
+
+
+Data_scaling20_by_clusters=data.frame(Var=colnames(NB20_scaling)[-1], LV1=NA, LV2=NA, LV3=NA, BA1=NA, BA2=NA, BA3=NA)
+
+for (i in 1:nrow(Data_scaling20_by_clusters)){
+  Data_scaling20_by_clusters$LV1[i]=nrow(LV_scaling_IV20_1)-nrow(LV_scaling_IV20_1[which(LV_scaling_IV20_1[,i]==0),])
+  Data_scaling20_by_clusters$LV2[i]=nrow(LV_scaling_IV20_2)-nrow(LV_scaling_IV20_2[which(LV_scaling_IV20_2[,i]==0),])
+  Data_scaling20_by_clusters$LV3[i]=nrow(LV_scaling_IV20_3)-nrow(LV_scaling_IV20_3[which(LV_scaling_IV20_3[,i]==0),])
+    
+  Data_scaling20_by_clusters$BA1[i]=nrow(BA_scaling_IV20_1)-nrow(BA_scaling_IV20_1[which(BA_scaling_IV20_1[,i]==0),])
+  Data_scaling20_by_clusters$BA2[i]=nrow(BA_scaling_IV20_2)-nrow(BA_scaling_IV20_2[which(BA_scaling_IV20_2[,i]==0),])
+  Data_scaling20_by_clusters$BA3[i]=nrow(BA_scaling_IV20_3)-nrow(BA_scaling_IV20_3[which(BA_scaling_IV20_3[,i]==0),])
+
+  }
+
+
+
+Data_scaling20_by_clusters$LVtot=apply(Data_scaling20_by_clusters[,2:4],1,'sum' )
+Data_scaling20_by_clusters$BAtot=apply(Data_scaling20_by_clusters[,5:7],1,'sum' )
+Data_scaling20_by_clusters=Data_scaling20_by_clusters[order(Data_scaling20_by_clusters$LVtot, decreasing = T),]
+
+BA_to_order_scaling=Data_scaling20_by_clusters[grep("^0", as.character(Data_scaling20_by_clusters$LVtot))[1]:nrow(Data_scaling20_by_clusters),]
+BA_to_order_scaling=BA_to_order_scaling[order(BA_to_order_scaling$BAtot, decreasing = T),]
+
+Data_scaling20_by_clusters[grep("^0", as.character(Data_scaling20_by_clusters$LVtot))[1]:nrow(Data_scaling20_by_clusters),]=BA_to_order_scaling
+
+Data_scaling20_by_clusters$TOT=Data_scaling20_by_clusters$LVtot+Data_scaling20_by_clusters$BAtot
+
+Data_scaling20_by_clusters$BA1=-Data_scaling20_by_clusters$BA1
+Data_scaling20_by_clusters$BA2=-Data_scaling20_by_clusters$BA2
+Data_scaling20_by_clusters$BA3=-Data_scaling20_by_clusters$BA3
+Data_scaling20_by_clusters$BAtot=-Data_scaling20_by_clusters$BAtot
+
+
+
+###### Need to reshape data
+##### Levers
+Data_scaling_LV20_by_clusters_reshape=reshape(Data_scaling20_by_clusters[,1:4],
+                               varying = c("LV1", "LV2", "LV3"),
+                               v.names = "LV",
+                               timevar = "cluster",
+                               direction = "long",
+                               idvar="Var")
+Data_scaling_LV20_by_clusters_reshape$cluster[which(Data_scaling_LV20_by_clusters_reshape$cluster==1)]="Green deal"
+Data_scaling_LV20_by_clusters_reshape$cluster[which(Data_scaling_LV20_by_clusters_reshape$cluster==2)]="Multi-scale co-production"
+Data_scaling_LV20_by_clusters_reshape$cluster[which(Data_scaling_LV20_by_clusters_reshape$cluster==3)]="Local transformation"
+
+Data_scaling_LV20_by_clusters_reshape$cluster=as.factor(Data_scaling_LV20_by_clusters_reshape$cluster)
+Data_scaling_LV20_by_clusters_reshape$Var=factor(Data_scaling_LV20_by_clusters_reshape$Var, levels=Data_scaling20_by_clusters$Var)
+
+
+
+```
+
+### Amplification barplots
+
+```{r plot_tot_scaling, warning=FALSE}
+### To do order by number of mention (TOT)
+
+Data_scaling20_by_clusters_order=Data_scaling20_by_clusters[order(Data_scaling20_by_clusters$TOT, decreasing = T),]
+
+
+
+###### Need to reshape data
+##### Levers
+Data_scaling_LV20_by_clusters_reshape=reshape(Data_scaling20_by_clusters_order[,1:4],
+                               varying = c("LV1", "LV2", "LV3"),
+                               v.names = "LV",
+                               timevar = "cluster",
+                               direction = "long",
+                               idvar="Var")
+Data_scaling_LV20_by_clusters_reshape$cluster[which(Data_scaling_LV20_by_clusters_reshape$cluster==1)]="Green deal"
+Data_scaling_LV20_by_clusters_reshape$cluster[which(Data_scaling_LV20_by_clusters_reshape$cluster==2)]="Multi-scale co-production"
+Data_scaling_LV20_by_clusters_reshape$cluster[which(Data_scaling_LV20_by_clusters_reshape$cluster==3)]="Local transformation"
+
+Data_scaling_LV20_by_clusters_reshape$cluster=as.factor(Data_scaling_LV20_by_clusters_reshape$cluster)
+Data_scaling_LV20_by_clusters_reshape$Var=factor(Data_scaling_LV20_by_clusters_reshape$Var, levels=Data_scaling20_by_clusters_order$Var)
+
+Data_scaling_BA20_by_clusters_reshape=reshape(Data_scaling20_by_clusters_order[,c(1,5:7)],
+                               varying = c("BA1", "BA2", "BA3"),
+                               v.names = "BA",
+                               timevar = "cluster",
+                               direction = "long",
+                               idvar="Var")
+
+Data_scaling_BA20_by_clusters_reshape$cluster[which(Data_scaling_BA20_by_clusters_reshape$cluster==1)]="Green deal"
+Data_scaling_BA20_by_clusters_reshape$cluster[which(Data_scaling_BA20_by_clusters_reshape$cluster==2)]="Multi-scale co-production"
+Data_scaling_BA20_by_clusters_reshape$cluster[which(Data_scaling_BA20_by_clusters_reshape$cluster==3)]="Local transformation"
+
+Data_scaling_BA20_by_clusters_reshape$cluster=as.factor(Data_scaling_BA20_by_clusters_reshape$cluster)
+Data_scaling_BA20_by_clusters_reshape$Var=factor(Data_scaling_BA20_by_clusters_reshape$Var, levels=Data_scaling20_by_clusters_order$Var)
+
+
+Data_plot_scaling_order=Data_scaling_LV20_by_clusters_reshape
+Data_plot_scaling_order$BA=Data_scaling_BA20_by_clusters_reshape$BA
+
+
+#### chi2 LB
+
+# Without differences between levers and barriers
+Data_scaling20_by_clusters_order_chi2=Data_scaling20_by_clusters_order
+Data_scaling20_by_clusters_order_chi2[,5:7]=-Data_scaling20_by_clusters_order_chi2[,5:7]
+
+chi2_scaling20_order=data.frame(Var=(Data_scaling20_by_clusters_order_chi2$Var), chi2=NA)
+for (i in 1:nrow(Data_scaling20_by_clusters_order_chi2)){
+    chi2_scaling20_order$chi2[i]=chisq.test(Data_scaling20_by_clusters_order_chi2[i,2:7])$p.value
+}
+chi2_scaling20_order$signif=NA
+for (i in 1:nrow(chi2_scaling20_order)){
+  if (chi2_scaling20_order$chi2[i]<0.1){
+    chi2_scaling20_order$signif[i]="*"
+  }
+  if (chi2_scaling20_order$chi2[i]<0.05){
+    chi2_scaling20_order$signif[i]="**"
+  }
+  if (chi2_scaling20_order$chi2[i]<0.001){
+    chi2_scaling20_order$signif[i]="***"
+  }
+}
+
+
+# With different chi2 test for levers and for barriers
+chi2_scaling20_diff_order=data.frame(LB=Data_scaling20_by_clusters_order$Var, LVchi2=NA, BAchi2=NA)
+for (i in 1:nrow(Data_scaling20_by_clusters_order)){
+  if (F %in% (Data_scaling20_by_clusters_order[i,2:4]==c(0,0,0))){
+  chi2_scaling20_diff_order$LVchi2[i]=chisq.test(Data_scaling20_by_clusters_order[i,2:4])$p.value}
+  if (F %in% (Data_scaling20_by_clusters_order[i,5:7]==c(0,0,0))){
+  chi2_scaling20_diff_order$BAchi2[i]=chisq.test(-Data_scaling20_by_clusters_order[i,5:7])$p.value
+}}
+chi2_scaling20_diff_order$LVsignif=NA
+chi2_scaling20_diff_order$BAsignif=NA
+for (i in 1:nrow(chi2_scaling20_diff_order)){
+  if (is.na(chi2_scaling20_diff_order$LVchi2[i])==F){
+  if (chi2_scaling20_diff_order$LVchi2[i]<0.1){
+    chi2_scaling20_diff_order$LVsignif[i]="*"
+  }
+  if (chi2_scaling20_diff_order$LVchi2[i]<0.05){
+    chi2_scaling20_diff_order$LVsignif[i]="**"
+  }
+  if (chi2_scaling20_diff_order$LVchi2[i]<0.001){
+    chi2_scaling20_diff_order$LVsignif[i]="***"
+  }}
+}
+
+for (i in 1:nrow(chi2_scaling20_diff_order)){
+  if (is.na(chi2_scaling20_diff_order$BAchi2[i])==F){
+  if (chi2_scaling20_diff_order$BAchi2[i]<0.1){
+    chi2_scaling20_diff_order$BAsignif[i]="*"
+  }
+  if (chi2_scaling20_diff_order$BAchi2[i]<0.05){
+    chi2_scaling20_diff_order$BAsignif[i]="**"
+  }
+  if (chi2_scaling20_diff_order$BAchi2[i]<0.001){
+    chi2_scaling20_diff_order$BAsignif[i]="***"
+  }}
+} 
+
+ 
+p=ggplot(Data_plot_scaling_order) + geom_bar(aes(x=Var, y=LV, fill=cluster ), stat="identity") + geom_bar(aes(x=Var, y=BA, fill=cluster ), stat="identity") + labs(y=NULL, x=NULL) + coord_flip() + scale_fill_grey(start = 0.7, end = 0.3)+ theme_minimal() + 
+  annotate("text", x=1:nrow(Data_scaling20_by_clusters_order), y=apply(Data_scaling20_by_clusters_order[,2:4], 1, 'sum')+0.5, label=chi2_scaling20_diff_order$LVsignif) + 
+  annotate("text", x=1:nrow(Data_scaling20_by_clusters_order), y=apply(Data_scaling20_by_clusters_order[,5:7], 1, 'sum')-0.5, label=chi2_scaling20_diff_order$BAsignif)
+
+print(p)
+
+
+
+```
