@@ -1,0 +1,87 @@
+Action;TYPE1;TYPE2;Landslide_probability_before;Landslide_probability_after;Urban_20m;Urban_65m;Urban_200m;Agriculture_20m;Agriculture_65m;Agriculture_200m;Road_20m;Road_65m;Road_200m;Population_20m;Population_65m;Population_200m;Economic_value_20m;Economic_value_65m;Economic_value_200m;Area_ha
+BIDyn1;River;River restoration ;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1.61
+BIDyn10;River;River restoration ;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0.1
+BIDyn11;River;River restoration ;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;6.58
+BIDyn12;River;River restoration ;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;3.02
+BIDyn2;River;River restoration ;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1.01
+BIDyn3;River;River restoration ;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;2.68
+BIDyn4;River;River restoration ;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;2.23
+BIDyn5;River;River restoration ;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1.09
+BIDyn6;River;River restoration ;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;3.21
+BIDyn7;River;River restoration ;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1.23
+BIDyn9;River;River restoration ;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0.16
+BozHos1;Urban;Integration of green elements in urban areas;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1.5
+Can1;Urban;Green urban area;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0.56
+Cem1;Wetland;Wetland restoration (Herbaceous);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0.27
+CeRes1;Wetland;Wetland restoration (Herbaceous);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;4.9
+CiRes1;Wetland;Wetland restoration (Forested);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;8.34
+CiRes2;Wetland;Wetland restoration (Forested);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;8.25
+CiRes3;Wetland;Wetland restoration (Forested);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;2.12
+CiRes4;Wetland;Wetland restoration (Forested);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;5.58
+CiRes5;Wetland;Wetland restoration (Forested);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;30.99
+CiRes6;Wetland;Wetland restoration (Forested);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;7.14
+CiRes7;Wetland;Wetland restoration (Forested);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;2.72
+Fir1;Urban;Green urban area;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;2.2
+InRe11;Wetland;Wetland restoration (Herbaceous);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0.87
+InRe110;Wetland;Wetland restoration (Herbaceous);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;2
+InRe111;Wetland;Wetland restoration (Herbaceous);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;2.69
+InRe112;Wetland;Wetland restoration (Herbaceous);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0.97
+InRe114;Wetland;Wetland restoration (Forested);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;4.21
+InRe115;Wetland;Wetland restoration (Herbaceous);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;11.78
+InRe117;Wetland;Wetland restoration (Herbaceous);0;0;0;0;0;0;0;0;0;0;0;0;0;5;0;0;0;3.02
+InRe118;Wetland;Wetland restoration (Herbaceous);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0.83
+InRe119;Wetland;Wetland restoration (Herbaceous);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;2.92
+InRe12;Wetland;Wetland restoration (Herbaceous);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;5.3
+InRe122;Wetland;Wetland restoration (Herbaceous);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1.17
+InRe123;Wetland;Wetland restoration (Forested);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;77.38
+InRe124;Wetland;Wetland restoration (Herbaceous);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;4.63
+InRe125;Wetland;Wetland restoration (Herbaceous);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;4.98
+InRe127;Wetland;Wetland restoration (Herbaceous);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;2.22
+InRe128;Wetland;Wetland restoration (Herbaceous);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;3.32
+InRe13;Wetland;Wetland restoration (Herbaceous);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;2
+InRe14;Wetland;Wetland restoration (Herbaceous);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;3.3
+InRe15;Wetland;Wetland restoration (Herbaceous);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0.63
+InRe17;Wetland;Wetland restoration (Herbaceous);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1.63
+InRe19;Wetland;Wetland restoration (Forested);0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0.78
+InRe20;Wetland;Wetland restoration (Herbaceous);0;0;0;0;0;0;0;0.980138944863;0;0;0;0;0;0;0;0;7547.0698754451;1.37
+IUGEN1;River;River restoration ;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1.43
+IUGEN2;Forest;Active forest plantation/restoration;9;0;0.333268603977;1.32346659272;3.75275292532;0;0;0;0;0;0;2;9;25;2220402.07399676;8817596.173997;25002716.3649445;15.08
+IUROM1;River;River restoration ;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;2.7
+IUSE1;River;River restoration ;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;172.13
+IUSE2;River;River restoration ;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;62.47
+Mar1;River;River restoration ;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;19.7
+NCION1;Urban;Integration of green elements in urban areas;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1.11
+NCION2;Urban;Integration of green elements in urban areas;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0.07
+NCION3;Urban;Integration of green elements in urban areas;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0.04
+NCION4;Urban;Green urban area;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0.07
+NCION5;Urban;Green urban area;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0.28
+NCION6;Urban;Green urban area;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0.06
+NCION7;Urban;Integration of green elements in urban areas;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0.18
+NCION8;Urban;Integration of green elements in urban areas;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0.18
+ONRTM1;Forest;Active forest plantation/restoration;49;29;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;24.41
+ONRTM10;Forest;Active forest plantation/restoration;39;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1.92
+ONRTM2;Forest;Active forest plantation/restoration;34;22;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;3.2
+ONRTM3;Forest;Active forest plantation/restoration;0;0;0;0;0;0.192649113705;0.855319301878;3.14294698854;0.288876456935;0.34572586278;1.02813259381;0;0;0;70813.7478399285;89560.1656916606;270952.514326158;16.67
+ONRTM4;Forest;Active forest plantation/restoration;44;23;0;0;0;0;0;2.95870956967;0;0;0;0;0;0;0;0;22782.063686459;167.05
+ONRTM5;Forest;Active forest plantation/restoration;7;8;0;0;0;0.0907749064118;1.01568903395;3.75493500635;0;0;0;0;0;0;698.96677937086;7820.805561415;28912.999548895;55.28
+ONRTM6;Forest;Active forest plantation/restoration;47;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;54.34
+ONRTM7;Forest;Active forest plantation/restoration;47;17;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;129.4
+ONRTM8;Forest;Active forest plantation/restoration;58;7;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;199.54
+PaDug1;Urban;Green urban area;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;37.31
+ParNorMi1;Urban;Green urban area;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;17.73
+PerMi1;Urban;Green urban area;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;8.83
+ReAll1;Forest;Forest plantation/restoration;22;4;0;0;0;0;0;0.119062875168;0;0;0;0;0;0;0;0;916.7841387936;6.55
+ReBu1;Forest;Forest plantation/restoration;14;0;0.00519997275464;0.107242321136;0.233424032026;0;0;;0;0;0;2;34;68;34644.818477789;714501.9645686;1555187.61337323;0.11
+ReCan1;Forest;Forest plantation/restoration;0;0;0;0;0;0;0;;0;0;0;0;0;0;0;0;0;8.97
+ReChi1;Forest;Forest plantation/restoration;43;18;0;0;0;0;0;;0;0;0;0;0;0;0;0;0;1.78
+ReInn1;Forest;Active forest plantation/restoration;16;0;0;0.304021128769;11.6840871335;2.57179158723;6.56424678648;12.0001342892;0;0;0;0;10;433;19802.795221671;2076085.47067936;77937631.5609706;138.8
+Reluc1;Forest;Forest plantation/restoration;20;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;13.96
+Reluc2;Forest;Forest plantation/restoration;11;0;0.477233491245;1.65138051859;5.72367646515;;;;0.000385949378822;0.00178157315594;0.0100960500056;2;7;23;3179660.76327073;11002750.2826633;38136417.5010632;8.25
+ReMen1;Forest;Forest plantation/restoration;11;0;0;0.0192758011793;5.12936222585;0.778826740255;3.66985088391;7.88588471043;0;0;0;0;2;433;5996.9658999635;156682.877163193;34235097.1419959;5.97
+ReSa11;Forest;Forest plantation/restoration;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;64.73
+ReSa2;Forest;Forest plantation/restoration;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;16.23
+ReVe1;Forest;Forest plantation/restoration;12;0;0.106374334959;0.626324089551;1.79236876582;0;0;0;0;0;0;2;9;23;708719.006664338;4172884.24663354;11941656.9022758;85.19
+ValCam1;River;River restoration ;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;11.77
+;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;

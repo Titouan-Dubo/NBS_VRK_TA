@@ -1,0 +1,84 @@
+Action;TYPE1;TYPE2;Year;Cost_project;Area_ha;Cost_ha_Eur;Cost_action
+BIDyn1;River;River restoration ;2020;6093220;1.61;265847.294938918;428014.144851658
+BIDyn10;River;River restoration ;2020;;0.1;265847.294938918;26584.7294938918
+BIDyn11;River;River restoration ;2020;;6.58;265847.294938918;1749275.20069808
+BIDyn12;River;River restoration ;2020;;3.02;265847.294938918;802858.830715532
+BIDyn2;River;River restoration ;2020;;1.01;265847.294938918;268505.767888307
+BIDyn3;River;River restoration ;2020;;2.68;265847.294938918;712470.7504363
+BIDyn4;River;River restoration ;2020;;2.23;265847.294938918;592839.467713787
+BIDyn5;River;River restoration ;2020;;1.09;265847.294938918;289773.551483421
+BIDyn6;River;River restoration ;2020;;3.21;265847.294938918;853369.816753927
+BIDyn7;River;River restoration ;2020;;1.23;265847.294938918;326992.172774869
+BIDyn9;River;River restoration ;2020;;0.16;265847.294938918;42535.5671902269
+BozHos1;Urban;Integration of green elements in urban areas;2014;874000;1.5;582666.666666667;874000
+Can1;Urban;Green urban area;2013;36400;0.56;65000;36400
+Cem1;Wetland;Wetland restoration (Herbaceous);2008;125000;0.27;462962.962962963;125000
+CeRes1;Wetland;Wetland restoration (Herbaceous);2020;341300;4.9;69653.0612244898;341300
+CiRes1;Wetland;Wetland restoration (Forested);2016;341300;8.34;5688.33333333333;47440.7
+CiRes2;Wetland;Wetland restoration (Forested);2016;;8.25;5688.33333333333;46928.75
+CiRes3;Wetland;Wetland restoration (Forested);2016;;2.12;5688.33333333333;12059.2666666667
+CiRes4;Wetland;Wetland restoration (Forested);2016;;5.58;5688.33333333333;31740.9
+CiRes5;Wetland;Wetland restoration (Forested);2016;;30.99;5688.33333333333;176281.45
+CiRes6;Wetland;Wetland restoration (Forested);2016;;7.14;5688.33333333333;40614.7
+CiRes7;Wetland;Wetland restoration (Forested);2016;;2.72;5688.33333333333;15472.2666666667
+Fir1;Urban;Green urban area;2007;1865743;2.2;848065;1865743
+InRe11;Wetland;Wetland restoration (Herbaceous);2014;1218899;0.87;8921.16665446827;7761.4149893874
+InRe110;Wetland;Wetland restoration (Herbaceous);2014;;2;8921.16665446827;17842.3333089365
+InRe111;Wetland;Wetland restoration (Herbaceous);2014;;2.69;8921.16665446827;23997.9383005197
+InRe112;Wetland;Wetland restoration (Herbaceous);2014;;0.97;8921.16665446827;8653.53165483422
+InRe114;Wetland;Wetland restoration (Forested);2014;;4.21;8921.16665446827;37558.1116153114
+InRe115;Wetland;Wetland restoration (Herbaceous);2014;;11.78;8921.16665446827;105091.343189636
+InRe117;Wetland;Wetland restoration (Herbaceous);2014;;3.02;8921.16665446827;26941.9232964942
+InRe118;Wetland;Wetland restoration (Herbaceous);2014;;0.83;8921.16665446827;7404.56832320867
+InRe119;Wetland;Wetland restoration (Herbaceous);2014;;2.92;8921.16665446827;26049.8066310474
+InRe12;Wetland;Wetland restoration (Herbaceous);2014;;5.3;8921.16665446827;47282.1832686818
+InRe122;Wetland;Wetland restoration (Herbaceous);2014;;1.17;8921.16665446827;10437.7649857279
+InRe123;Wetland;Wetland restoration (Forested);2014;;77.38;8921.16665446827;690319.875722755
+InRe124;Wetland;Wetland restoration (Herbaceous);2014;;4.63;8921.16665446827;41305.0016101881
+InRe125;Wetland;Wetland restoration (Herbaceous);2014;;4.98;8921.16665446827;44427.409939252
+InRe127;Wetland;Wetland restoration (Herbaceous);2014;;2.22;8921.16665446827;19804.9899729196
+InRe128;Wetland;Wetland restoration (Herbaceous);2014;;3.32;8921.16665446827;29618.2732928347
+InRe13;Wetland;Wetland restoration (Herbaceous);2014;;2;8921.16665446827;17842.3333089365
+InRe14;Wetland;Wetland restoration (Herbaceous);2014;;3.3;8921.16665446827;29439.8499597453
+InRe15;Wetland;Wetland restoration (Herbaceous);2014;;0.63;8921.16665446827;5620.33499231501
+InRe17;Wetland;Wetland restoration (Herbaceous);2014;;1.63;8921.16665446827;14541.5016467833
+InRe19;Wetland;Wetland restoration (Forested);2014;;0.78;8921.16665446827;6958.50999048525
+InRe20;Wetland;Wetland restoration (Herbaceous);2014;;1.37;8921.16665446827;12221.9983166215
+IUGEN1;River;River restoration ;2010;1255766;1.43;76060.9327680194;108767.133858268
+IUGEN2;Forest;Active forest plantation/restoration;2010;;15.08;76060.9327680194;1146998.86614173
+IUROM1;River;River restoration ;2006;25500000;2.7;9444444.44444444;25500000
+IUSE1;River;River restoration ;2004;135000000;172.13;575447.570332481;99051790.2813299
+IUSE2;River;River restoration ;2004;;62.47;575447.570332481;35948209.7186701
+Mar1;River;River restoration ;2007;2800000;19.7;142131.979695431;2800000
+NCION1;Urban;Integration of green elements in urban areas;2014;272250;1.11;136809.045226131;151858.040201005
+NCION2;Urban;Integration of green elements in urban areas;2014;;0.07;136809.045226131;9576.63316582915
+NCION3;Urban;Integration of green elements in urban areas;2014;;0.04;136809.045226131;5472.36180904523
+NCION4;Urban;Green urban area;2014;;0.07;136809.045226131;9576.63316582915
+NCION5;Urban;Green urban area;2014;;0.28;136809.045226131;38306.5326633166
+NCION6;Urban;Green urban area;2014;;0.06;136809.045226131;8208.54271356784
+NCION7;Urban;Integration of green elements in urban areas;2014;;0.18;136809.045226131;24625.6281407035
+NCION8;Urban;Integration of green elements in urban areas;2014;;0.18;136809.045226131;24625.6281407035
+ONRTM1;Forest;Active forest plantation/restoration;;;24.41;15000;366150
+ONRTM10;Forest;Active forest plantation/restoration;;;1.92;15000;28800
+ONRTM2;Forest;Active forest plantation/restoration;;;3.2;15000;48000
+ONRTM3;Forest;Active forest plantation/restoration;;;16.67;15000;250050
+ONRTM4;Forest;Active forest plantation/restoration;;;167.05;15000;2505750
+ONRTM5;Forest;Active forest plantation/restoration;;;55.28;15000;829200
+ONRTM6;Forest;Active forest plantation/restoration;;;54.34;15000;815100
+ONRTM7;Forest;Active forest plantation/restoration;;;129.4;15000;1941000
+ONRTM8;Forest;Active forest plantation/restoration;;;199.54;15000;2993100
+PaDug1;Urban;Green urban area;2021;23000000;37.31;616456.71401769;23000000
+ParNorMi1;Urban;Green urban area;2020;21000;17.73;1184.4331641286;21000
+PerMi1;Urban;Green urban area;2021;680000;8.83;77010.1925254813;680000
+ReAll1;Forest;Forest plantation/restoration;2020;3071.25;6.55;4857;31813.35
+ReBu1;Forest;Forest plantation/restoration;2021;1593.41;0.11;4857;534.27
+ReCan1;Forest;Forest plantation/restoration;2019;4004;5;4857;24285
+ReChi1;Forest;Forest plantation/restoration;2017;2230.41;1.78;4857;8645.46
+ReInn1;Forest;Active forest plantation/restoration;1950;15412579.48;138.8;111041.638904899;15412579.48
+Reluc1;Forest;Forest plantation/restoration;2014;2007.46;13.96;4857;67803.72
+Reluc2;Forest;Forest plantation/restoration;2014;40070.25;8.25;4857;40070.25
+ReMen1;Forest;Forest plantation/restoration;2019;3087.63;5.97;4857;28996.29
+ReSa11;Forest;Forest plantation/restoration;;15036.84;64.73;4857;314393.61
+ReSa2;Forest;Forest plantation/restoration;;3376.1;16.23;4857;78829.11
+ReVe1;Forest;Forest plantation/restoration;;2944.76;85.19;4857;413767.83
+ValCam1;River;River restoration ;2016;205300;11.77;17442.6508071368;205300
