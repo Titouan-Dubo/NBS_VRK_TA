@@ -1,0 +1,1435 @@
+---
+title: "NBS_CBA"
+output: html_document
+date: "2024-01-12"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Libraries
+```{r}
+fx=function(x){print(x)}
+library(utils)
+library(ggplot2)
+library(corrplot)
+library(coin)
+
+
+```
+
+
+# Data import
+
+```{r}
+
+data=read.csv2("Posit/Data/S4_Results_21_03_2024.csv", dec= ".", na.strings = "NA")
+str(data)
+data$Carbon_ha_before=as.numeric(data$Carbon_ha_before)
+data$TYPE1=as.factor(data$TYPE1)
+data$TYPE2=as.factor(data$TYPE2)
+data$Action=as.factor(data$Action)
+data$Project=as.factor(data$Project)
+
+
+table(data$TYPE1)
+# Forest   River  Urban   Wetland 
+#   21      17     14      31
+table(data$TYPE2)
+# Active forest plantation/restoration                Forest plantation/restoration 
+#                       11                                           10 
+# Green urban area               Integration of green elements in urban areas 
+#           8                                            6 
+# River restoration                Wetland restoration (Forested) 
+#       17                                           10 
+#             Wetland restoration (Herbaceous) 
+#                     21 
+
+
+
+
+```
+
+
+# Figures (violin & jitter)
+
+```{r}
+
+# Flood regulation 
+summary(data$rnf_rt_idx_bef)
+summary(data$rnf_rt_idx_aft)
+
+data$rnf_rt_idx_diff=(data$rnf_rt_idx_aft-data$rnf_rt_idx_bef)/data$rnf_rt_idx_bef
+summary(data$rnf_rt_idx_diff)
+
+p=ggplot(data) + geom_violin(aes(y=rnf_rt_idx_diff, x=TYPE2, fill=TYPE2)) + 
+  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ggsave(plot=p, "Posit/Export/Figures/violin_diff_flood_mitigation_type2.png", width=4*2, height=10*2, limitsize=F, dpi = 300)
+
+p=ggplot(data) + geom_point(aes(y=rnf_rt_idx_diff, x=TYPE2, col=TYPE2), position = position_jitter(width = 0.2)) +
+  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ggsave(plot=p, "Posit/Export/Figures/points_diff_flood_mitigation_type2.png", width=4*2, height=10*2, limitsize=F, dpi = 300)
+
+
+p=ggplot(data) + geom_violin(aes(y=rnf_rt_idx_bef, x=TYPE2, fill='red')) +
+  geom_violin(aes(y=rnf_rt_idx_aft, x=TYPE2, fill='blue')) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+# Heatwaves
+summary(data$Avrg_CC_before)
+summary(data$Avrg_CC_after)
+
+data$Avrg_CC_diff=(data$Avrg_CC_after-data$Avrg_CC_before)/data$Avrg_CC_before
+summary(data$Avrg_CC_diff)
+
+p=ggplot(data) + geom_point(aes(y=Avrg_CC_diff, x=TYPE2, col=TYPE2), position = position_jitter(width = 0.2)) +
+  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ggsave(plot=p, "Posit/Export/Figures/points_diff_heatwave_mitigation_type2.png", width=4*2, height=10*2, limitsize=F, dpi = 300)
+
+p=ggplot(data) + geom_violin(aes(y=Avrg_CC_diff, x=TYPE2, fill=TYPE2)) + 
+  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ggsave(plot=p, "Posit/Export/Figures/violin_diff_heatwave_mitigation_type2.png", width=4*2, height=10*2, limitsize=F, dpi = 300)
+
+
+# Carbon
+summary(data$Carbon_ha_before)
+summary(data$Carbon_ha_after)
+
+data$Carbon_ha_diff=(data$Carbon_ha_after-data$Carbon_ha_before)/data$Carbon_ha_before
+summary(data$Carbon_ha_diff)
+
+p=ggplot(data) + geom_point(aes(y=Carbon_ha_diff, x=TYPE2, col=TYPE2), position = position_jitter(width = 0.2)) +
+  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ggsave(plot=p, "Posit/Export/Figures/points_diff_carbon_seq_type2.png", width=4*2, height=10*2, limitsize=F, dpi = 300)
+
+p=ggplot(data) + geom_violin(aes(y=Carbon_ha_diff, x=TYPE2, fill=TYPE2)) + 
+  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ggsave(plot=p, "Posit/Export/Figures/violin_diff_carbon_seq_type2.png", width=4*2, height=10*2, limitsize=F, dpi = 300)
+
+
+
+# Landslides
+summary(data$LS_prob_before)
+summary(data$LS_prob_after)
+
+
+data$LS_prob_diff=(data$LS_prob_after-data$LS_prob_before)
+summary(data$LS_prob_diff)
+
+
+p=ggplot(data) + geom_point(aes(y=LS_prob_diff, x=TYPE2, col=TYPE2), position = position_jitter(width = 0.2)) +
+  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ggsave(plot=p, "Posit/Export/Figures/points_landslides_prob_type2.png", width=4*2, height=10*2, limitsize=F, dpi = 300)
+
+p=ggplot(data) + geom_violin(aes(y=LS_prob_diff, x=TYPE2, fill=TYPE2)) + 
+  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ggsave(plot=p, "Posit/Export/Figures/violin_landslides_prob_type2.png", width=4*2, height=10*2, limitsize=F, dpi = 300)
+
+
+
+
+```
+
+
+
+
+# Corrplot between variables
+
+```{r}
+
+
+# Spearman
+corrplot(corr=cor(data[,-c(1:5)], method="spearman"), method="circle", type="lower", number.digits=2, insig="blank", sig.level=0.05, tl.srt=45)
+
+write.csv2(cor(data[,-c(1:5)], method="spearman"), "Posit/Export/Table_correlation_data_spearman.csv")
+
+# pearson
+corrplot(corr=cor(data[,-c(1:5)], method="pearson"), method="circle", type="lower", number.digits=2, insig="blank", sig.level=0.05, tl.srt=45)
+
+write.csv2(cor(data[,-c(1:5)], method="pearson"), "Posit/Export/Table_correlation_data_pearson.csv")
+
+
+
+
+```
+
+
+# Wilcoxon tests on type2
+
+## Wilcoxon tests before-after
+
+```{r}
+# Flood mitigation
+wilcoxdata=data.frame(Type=NA, wilcox=NA, dir=NA)
+for (i in 1:nlevels(data$TYPE2)){
+  wilcox_exact=data.frame(Values=c(data$rnf_rt_idx_bef[which(data$TYPE2==levels(data$TYPE2)[i])], 
+                          data$rnf_rt_idx_aft[which(data$TYPE2==levels(data$TYPE2)[i])]),
+                          Intervention=factor(rep(c("Before", "After"), each = nrow(data[which(data$TYPE2==levels(data$TYPE2)[i]),]))),
+                          Block=factor(rep(1:nrow(data[which(data$TYPE2==levels(data$TYPE2)[i]),]), 2)))
+  if (nrow(data[which(data$TYPE2==levels(data$TYPE2)[i]),]) >2){
+    wilcoxtest=wilcox_test(data=wilcox_exact, Values~Intervention|Block) # p-value = 2.184e-05
+    dir=-1
+      if (median(data$rnf_rt_idx_diff[which(data$TYPE2==levels(data$TYPE2)[i])], na.rm=T)>0){dir=1}
+  
+    if (pvalue(wilcoxtest) > 0.1) {dir=0}
+    
+    wilcoxdata[i,]=c(levels(data$TYPE2)[i], pvalue(wilcoxtest), dir)
+  }
+  }
+
+wilcoxdata
+wilcoxdata$wilcox=as.numeric(wilcoxdata$wilcox)
+wilcoxdata$signif=NA
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.1)]="*"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.05)]="**"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.01)]="***"
+
+wilcoxdata$wilcox=round(as.numeric(wilcoxdata$wilcox), 4)
+
+write.csv2(wilcoxdata, "Posit/Export/wilcox_bef_aft_exact_results_type2_flood_miti.csv")
+
+## heatwaves
+# Wilcox exact
+
+wilcoxdata=data.frame(Type=NA, wilcox=NA, dir=NA)
+for (i in 1:nlevels(data$TYPE2)){
+  wilcox_exact=data.frame(Values=c(data$Avrg_CC_before[which(data$TYPE2==levels(data$TYPE2)[i])], 
+                          data$Avrg_CC_after[which(data$TYPE2==levels(data$TYPE2)[i])]),
+                          Intervention=factor(rep(c("Before", "After"), each = nrow(data[which(data$TYPE2==levels(data$TYPE2)[i]),]))),
+                          Block=factor(rep(1:nrow(data[which(data$TYPE2==levels(data$TYPE2)[i]),]), 2)))
+  if (nrow(data[which(data$TYPE2==levels(data$TYPE2)[i]),]) >2){
+    wilcoxtest=wilcox_test(data=wilcox_exact, Values~Intervention|Block) # p-value = 2.184e-05
+    dir=-1
+      if (median(data$Avrg_CC_diff[which(data$TYPE2==levels(data$TYPE2)[i])], na.rm=T)>0){dir=1}
+  
+    if (pvalue(wilcoxtest) > 0.1) {dir=0}
+    
+    wilcoxdata[i,]=c(levels(data$TYPE2)[i], pvalue(wilcoxtest), dir)
+  }
+  }
+
+
+wilcoxdata
+wilcoxdata$wilcox=as.numeric(wilcoxdata$wilcox)
+wilcoxdata$signif=NA
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.1)]="*"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.05)]="**"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.01)]="***"
+
+wilcoxdata$wilcox=round(as.numeric(wilcoxdata$wilcox), 4)
+
+write.csv2(wilcoxdata, "Posit/Export/wilcox_bef_aft_exact_results_type2_heatwave.csv")
+
+
+# Carbon
+wilcoxdata=data.frame(Type=NA, wilcox=NA, dir=NA)
+for (i in 1:nlevels(data$TYPE2)){
+  data_na=data[-which(is.na(data$Carbon_ha_before)),]
+  wilcox_exact=data.frame(Values=c(data_na$Carbon_ha_before[which(data_na$TYPE2==levels(data_na$TYPE2)[i])], 
+                          data_na$Carbon_ha_after[which(data_na$TYPE2==levels(data_na$TYPE2)[i])]),
+                          Intervention=factor(rep(c("Before", "After"), each = nrow(data_na[which(data_na$TYPE2==levels(data_na$TYPE2)[i]),]))),
+                          Block=factor(rep(1:nrow(data_na[which(data_na$TYPE2==levels(data_na$TYPE2)[i]),]), 2)))
+  
+  
+  if (nrow(data_na[which(data_na$TYPE2==levels(data_na$TYPE2)[i]),]) >2){
+    wilcoxtest=wilcox_test(data=wilcox_exact, Values~Intervention|Block) # p-value = 2.184e-05
+    dir=-1
+      if (median(data_na$Carbon_ha_diff[which(data_na$TYPE2==levels(data_na$TYPE2)[i])], na.rm=T)>0){dir=1}
+  
+    if (pvalue(wilcoxtest) > 0.1) {dir=0}
+    
+    wilcoxdata[i,]=c(levels(data_na$TYPE2)[i], pvalue(wilcoxtest), dir)
+  }
+  }
+
+
+wilcoxdata
+wilcoxdata$wilcox=as.numeric(wilcoxdata$wilcox)
+wilcoxdata$signif=NA
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.1)]="*"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.05)]="**"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.01)]="***"
+
+wilcoxdata$wilcox=round(as.numeric(wilcoxdata$wilcox), 4)
+
+write.csv2(wilcoxdata, "Posit/Export/wilcox_bef_aft_exact_results_type2_carbon.csv")
+
+## Landslides
+wilcoxdata=data.frame(Type=NA, wilcox=NA, dir=NA)
+for (i in 1:nlevels(data$TYPE2)){
+  wilcox_exact=data.frame(Values=c(data$LS_prob_before[which(data$TYPE2==levels(data$TYPE2)[i])], 
+                          data$LS_prob_after[which(data$TYPE2==levels(data$TYPE2)[i])]),
+                          Intervention=factor(rep(c("Before", "After"), each = nrow(data[which(data$TYPE2==levels(data$TYPE2)[i]),]))),
+                          Block=factor(rep(1:nrow(data[which(data$TYPE2==levels(data$TYPE2)[i]),]), 2)))
+  if (nrow(data[which(data$TYPE2==levels(data$TYPE2)[i]),]) >2){
+    if (T %in% (data$LS_prob_diff[which(data$TYPE2==levels(data$TYPE2)[i])]!=0)){
+    wilcoxtest=wilcox_test(data=wilcox_exact, Values~Intervention|Block) # p-value = 2.184e-05
+    dir=-1
+      if (median(data$LS_prob_diff[which(data$TYPE2==levels(data$TYPE2)[i])], na.rm=T)>0){dir=1}
+  
+    if (pvalue(wilcoxtest) > 0.1) {dir=0}
+    
+    wilcoxdata[i,]=c(levels(data$TYPE2)[i], pvalue(wilcoxtest), dir)}
+    
+    if (sum(data$LS_prob_diff[which(data$TYPE2==levels(data$TYPE2)[i])], na.rm=T)==0){
+      wilcoxdata[i,]=c(levels(data$TYPE2)[i], 1, 0)}
+    
+  }
+  }
+
+
+wilcoxdata
+wilcoxdata$wilcox=as.numeric(wilcoxdata$wilcox)
+wilcoxdata$signif=NA
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.1)]="*"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.05)]="**"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.01)]="***"
+
+wilcoxdata$wilcox=round(as.numeric(wilcoxdata$wilcox), 4)
+
+write.csv2(wilcoxdata, "Posit/Export/wilcox_bef_aft_exact_results_type2_landslides.csv")
+
+
+
+```
+
+# Tests Area
+
+```{r}
+
+str(data$Area_ha)
+str(data$TYPE2)
+str(data$TYPE1)
+
+aov_area=aov(data=data, Area_ha~TYPE2)
+anova(aov_area)
+# Df Sum Sq Mean Sq F value    Pr(>F)    
+# data$TYPE2  6  41045  6840.9  5.4743 9.437e-05 ***
+# Residuals  76  94971  1249.6                      
+
+model_tukey=TukeyHSD(aov_area,  conf.level=.95)
+model_tukey$TYPE2[which(model_tukey$TYPE2[,4]<0.05),]
+
+#                                                                                       diff        lwr        upr        p adj
+# Forest plantation/restoration < Active forest plantation/restoration            -52.07055  -98.85074  -5.290349 1.935091e-02
+# Green urban area < Active forest plantation/restoration                         -64.86455 -114.61353 -15.115563 3.174725e-03
+# Integration of green elements in urban areas < Active forest plantation/restoration -72.73 -127.06891 -18.393515 2.231509e-03
+# River restoration < Active forest plantation/restoration                        -56.00219  -97.43143 -14.572954 1.946749e-03
+# Wetland restoration (Forested) < Active forest plantation/restoration           -58.49355 -105.27374 -11.713349 5.393002e-03
+# Wetland restoration (Herbaceous) < Active forest plantation/restoration         -70.34931 -110.19834 -30.500279 1.838917e-05
+
+
+write.csv2(model_tukey$TYPE2[which(model_tukey$TYPE2[,4]<0.05),], "Posit/Export/area_type2_signif.csv")
+
+## TYPE1
+
+aov_area=aov(data=data, Area_ha~TYPE1)
+anova(aov_area)
+# Df Sum Sq Mean Sq F value    Pr(>F)    
+# TYPE1      3  25679  8559.5  6.1285 0.0008415 ***
+# Residuals 79 110338  1396.7                  
+
+model_tukey=TukeyHSD(aov_area,  conf.level=.95)
+model_tukey$TYPE1[which(model_tukey$TYPE1[,4]<0.05),]
+
+#                     diff       lwr        upr        p adj
+# Urban-Forest   -43.44048 -77.28335  -9.597607 0.0063021197
+# Wetland-Forest -41.72937 -69.45095 -14.007789 0.0009514197
+
+
+write.csv2(model_tukey$TYPE1[which(model_tukey$TYPE1[,4]<0.05),], "Posit/Export/area_type1_signif.csv")
+
+
+
+```
+
+
+
+
+
+# Wilcoxon tests on Type1
+
+## Shapiro test
+
+```{r}
+### Floods
+shapiro.test(data$rnf_rt_idx_bef) # p-value = 1.025e-05 non-normal distribution
+shapiro.test(data$rnf_rt_idx_aft) # p-value = 0.0002386 non-normal distribution
+Shapidatabef=data.frame(Type=NA, Shapi=NA)
+Shapidataaft=data.frame(Type=NA, Shapi=NA)
+for (i in 1:nlevels(data$TYPE1)){
+  if (nrow(data[which(data$TYPE1==levels(data$TYPE1)[i]),]) >2){
+  shapibef=shapiro.test(data$rnf_rt_idx_bef[which(data$TYPE1==levels(data$TYPE1)[i])])
+  shapiaft=shapiro.test(data$rnf_rt_idx_aft[which(data$TYPE1==levels(data$TYPE1)[i])])
+  Shapidatabef[i,]=c(levels(data$TYPE1)[i], shapibef$p.value)
+  Shapidataaft[i,]=c(levels(data$TYPE1)[i], shapiaft$p.value)
+}
+  }
+
+# Shapidatabef$Shapi<0.05
+ # FALSE  TRUE  TRUE  TRUE
+# Shapidataaft$Shapi<0.05
+ # FALSE  TRUE FALSE FALSE
+
+# => non-normal distribution
+
+### heatwaves
+shapiro.test(data$Avrg_CC_before) # p-value =  1.047e-05 => non-normal distribution
+shapiro.test(data$Avrg_CC_after) # p-value = 8.453e-07 => non-normal distribution
+Shapidatabef=data.frame(Type=NA, Shapi=NA)
+Shapidataaft=data.frame(Type=NA, Shapi=NA)
+for (i in 1:nlevels(data$TYPE1)){
+  if (nrow(data[which(data$TYPE1==levels(data$TYPE1)[i]),]) >2){
+  shapibef=shapiro.test(data$Avrg_CC_before[which(data$TYPE1==levels(data$TYPE1)[i])])
+  shapiaft=shapiro.test(data$Avrg_CC_after[which(data$TYPE1==levels(data$TYPE1)[i])])
+  Shapidatabef[i,]=c(levels(data$TYPE1)[i], shapibef$p.value)
+  Shapidataaft[i,]=c(levels(data$TYPE1)[i], shapiaft$p.value)
+}
+  }
+
+# Shapidatabef$Shapi<0.05
+ #  TRUE  TRUE  TRUE FALSE
+# Shapidataaft$Shapi<0.05
+# FALSE  TRUE  TRUE FALSE
+
+# => non-normal distribution
+
+
+### carbon
+shapiro.test(data$Carbon_ha_before) # p-value =  0.000256 => non-normal distribution
+shapiro.test(data$Carbon_ha_after) # p-value = 3.538e-09 => non-normal distribution
+Shapidatabef=data.frame(Type=NA, Shapi=NA)
+Shapidataaft=data.frame(Type=NA, Shapi=NA)
+for (i in 1:nlevels(data$TYPE1)){
+  if (nrow(data[which(data$TYPE1==levels(data$TYPE1)[i]),]) >2){
+  shapibef=shapiro.test(data$Carbon_ha_before[which(data$TYPE1==levels(data$TYPE1)[i])])
+  shapiaft=shapiro.test(data$Carbon_ha_after[which(data$TYPE1==levels(data$TYPE1)[i])])
+  Shapidatabef[i,]=c(levels(data$TYPE1)[i], shapibef$p.value)
+  Shapidataaft[i,]=c(levels(data$TYPE1)[i], shapiaft$p.value)
+}
+  }
+
+# Shapidatabef$Shapi<0.05
+ #  TRUE TRUE TRUE TRUE
+# Shapidataaft$Shapi<0.05
+# FALSE  TRUE FALSE FALSE
+
+# => non-normal distribution
+
+### landslides
+# shapiro.test(data$LS_prob_before) # p-value =  1.399e-15 => non-normal distribution
+# shapiro.test(data$LS_prob_after) # p-value < 2.2e-16 => non-normal distribution
+# Shapidatabef=data.frame(Type=NA, Shapi=NA)
+# Shapidataaft=data.frame(Type=NA, Shapi=NA)
+# for (i in 1:nlevels(data$TYPE1)){
+#   if (nrow(data[which(data$TYPE1==levels(data$TYPE1)[i]),]) >2){
+#   shapibef=shapiro.test(data$LS_prob_before[which(data$TYPE1==levels(data$TYPE1)[i])])
+#   shapiaft=shapiro.test(data$LS_prob_after[which(data$TYPE1==levels(data$TYPE1)[i])])
+#   Shapidatabef[i,]=c(levels(data$TYPE1)[i], shapibef$p.value)
+#   Shapidataaft[i,]=c(levels(data$TYPE1)[i], shapiaft$p.value)
+# }
+#   }
+
+# not possible, to many ties
+
+
+
+
+```
+
+
+## Wilcoxon tests before-after paired
+
+
+```{r}
+# Flood mitigation
+wilcoxdata=data.frame(Type=NA, wilcox=NA, dir=NA)
+for (i in 1:nlevels(data$TYPE1)){
+  wilcox_exact=data.frame(Values=c(data$rnf_rt_idx_bef[which(data$TYPE1==levels(data$TYPE1)[i])], 
+                          data$rnf_rt_idx_aft[which(data$TYPE1==levels(data$TYPE1)[i])]),
+                          Intervention=factor(rep(c("Before", "After"), each = nrow(data[which(data$TYPE1==levels(data$TYPE1)[i]),]))),
+                          Block=factor(rep(1:nrow(data[which(data$TYPE1==levels(data$TYPE1)[i]),]), 2)))
+  if (nrow(data[which(data$TYPE1==levels(data$TYPE1)[i]),]) >2){
+    wilcoxtest=wilcox_test(data=wilcox_exact, Values~Intervention|Block) # p-value = 2.184e-05
+    dir=-1
+      if (median(data$rnf_rt_idx_diff[which(data$TYPE1==levels(data$TYPE1)[i])], na.rm=T)>0){dir=1}
+  
+    if (pvalue(wilcoxtest) > 0.1) {dir=0}
+    
+    wilcoxdata[i,]=c(levels(data$TYPE1)[i], pvalue(wilcoxtest), dir)
+  }
+  }
+
+wilcoxdata
+wilcoxdata$wilcox=as.numeric(wilcoxdata$wilcox)
+wilcoxdata$signif=NA
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.1)]="*"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.05)]="**"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.01)]="***"
+
+wilcoxdata$wilcox=round(as.numeric(wilcoxdata$wilcox), 4)
+
+write.csv2(wilcoxdata, "Posit/Export/wilcox_bef_aft_exact_results_TYPE1_flood_miti.csv")
+
+## heatwaves
+wilcoxdata=data.frame(Type=NA, wilcox=NA, dir=NA)
+for (i in 1:nlevels(data$TYPE1)){
+  wilcox_exact=data.frame(Values=c(data$Avrg_CC_before[which(data$TYPE1==levels(data$TYPE1)[i])], 
+                          data$Avrg_CC_after[which(data$TYPE1==levels(data$TYPE1)[i])]),
+                          Intervention=factor(rep(c("Before", "After"), each = nrow(data[which(data$TYPE1==levels(data$TYPE1)[i]),]))),
+                          Block=factor(rep(1:nrow(data[which(data$TYPE1==levels(data$TYPE1)[i]),]), 2)))
+  if (nrow(data[which(data$TYPE1==levels(data$TYPE1)[i]),]) >2){
+    wilcoxtest=wilcox_test(data=wilcox_exact, Values~Intervention|Block) # p-value = 2.184e-05
+    dir=-1
+      if (median(data$Avrg_CC_diff[which(data$TYPE1==levels(data$TYPE1)[i])], na.rm=T)>0){dir=1}
+  
+    if (pvalue(wilcoxtest) > 0.1) {dir=0}
+    
+    wilcoxdata[i,]=c(levels(data$TYPE1)[i], pvalue(wilcoxtest), dir)
+  }
+  }
+
+
+wilcoxdata
+wilcoxdata$wilcox=as.numeric(wilcoxdata$wilcox)
+wilcoxdata$signif=NA
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.1)]="*"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.05)]="**"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.01)]="***"
+
+wilcoxdata$wilcox=round(as.numeric(wilcoxdata$wilcox), 4)
+
+write.csv2(wilcoxdata, "Posit/Export/wilcox_bef_aft_exact_results_TYPE1_heatwave.csv")
+
+
+# Carbon
+wilcoxdata=data.frame(Type=NA, wilcox=NA, dir=NA)
+for (i in 1:nlevels(data$TYPE1)){
+  data_na=data[-which(is.na(data$Carbon_ha_before)),]
+  wilcox_exact=data.frame(Values=c(data_na$Carbon_ha_before[which(data_na$TYPE1==levels(data_na$TYPE1)[i])], 
+                          data_na$Carbon_ha_after[which(data_na$TYPE1==levels(data_na$TYPE1)[i])]),
+                          Intervention=factor(rep(c("Before", "After"), each = nrow(data_na[which(data_na$TYPE1==levels(data_na$TYPE1)[i]),]))),
+                          Block=factor(rep(1:nrow(data_na[which(data_na$TYPE1==levels(data_na$TYPE1)[i]),]), 2)))
+  
+  
+  if (nrow(data_na[which(data_na$TYPE1==levels(data_na$TYPE1)[i]),]) >2){
+    wilcoxtest=wilcox_test(data=wilcox_exact, Values~Intervention|Block) # p-value = 2.184e-05
+    dir=-1
+      if (median(data_na$Carbon_ha_diff[which(data_na$TYPE1==levels(data_na$TYPE1)[i])], na.rm=T)>0){dir=1}
+  
+    if (pvalue(wilcoxtest) > 0.1) {dir=0}
+    
+    wilcoxdata[i,]=c(levels(data_na$TYPE1)[i], pvalue(wilcoxtest), dir)
+  }
+  }
+
+
+wilcoxdata
+wilcoxdata$wilcox=as.numeric(wilcoxdata$wilcox)
+wilcoxdata$signif=NA
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.1)]="*"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.05)]="**"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.01)]="***"
+
+wilcoxdata$wilcox=round(as.numeric(wilcoxdata$wilcox), 4)
+
+write.csv2(wilcoxdata, "Posit/Export/wilcox_bef_aft_exact_results_TYPE1_carbon.csv")
+
+## Landslides
+wilcoxdata=data.frame(Type=NA, wilcox=NA, dir=NA)
+for (i in 1:nlevels(data$TYPE1)){
+  wilcox_exact=data.frame(Values=c(data$LS_prob_before[which(data$TYPE1==levels(data$TYPE1)[i])], 
+                          data$LS_prob_after[which(data$TYPE1==levels(data$TYPE1)[i])]),
+                          Intervention=factor(rep(c("Before", "After"), each = nrow(data[which(data$TYPE1==levels(data$TYPE1)[i]),]))),
+                          Block=factor(rep(1:nrow(data[which(data$TYPE1==levels(data$TYPE1)[i]),]), 2)))
+  if (nrow(data[which(data$TYPE1==levels(data$TYPE1)[i]),]) >2){
+    if (T %in% (data$LS_prob_diff[which(data$TYPE1==levels(data$TYPE1)[i])]!=0)){
+    wilcoxtest=wilcox_test(data=wilcox_exact, Values~Intervention|Block) # p-value = 2.184e-05
+    dir=-1
+      if (median(data$LS_prob_diff[which(data$TYPE1==levels(data$TYPE1)[i])], na.rm=T)>0){dir=1}
+  
+    if (pvalue(wilcoxtest) > 0.1) {dir=0}
+    
+    wilcoxdata[i,]=c(levels(data$TYPE1)[i], pvalue(wilcoxtest), dir)}
+    
+    if (sum(data$LS_prob_diff[which(data$TYPE1==levels(data$TYPE1)[i])], na.rm=T)==0){
+      wilcoxdata[i,]=c(levels(data$TYPE1)[i], 1, 0)}
+    
+  }
+  }
+
+
+wilcoxdata
+wilcoxdata$wilcox=as.numeric(wilcoxdata$wilcox)
+wilcoxdata$signif=NA
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.1)]="*"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.05)]="**"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.01)]="***"
+
+wilcoxdata$wilcox=round(as.numeric(wilcoxdata$wilcox), 4)
+
+write.csv2(wilcoxdata, "Posit/Export/wilcox_bef_aft_exact_results_TYPE1_landslides.csv")
+
+
+
+```
+
+
+# Tests Biodiversity
+
+```{r}
+data_bd=read.csv2("Posit/Data/Biodiversity.csv")
+data_bd=data_bd[1:36,]
+str(data_bd)
+
+summary(data_bd)
+
+data_bd$Ecosystem=as.factor(data_bd$Ecosystem)
+
+# ANOVA Nb_sp
+aov_bd=aov(data=data_bd, Nb_sp~Ecosystem)
+anova(aov_bd)
+#           Df  Sum Sq Mean Sq F value Pr(>F)
+# Ecosystem  3  499.96 166.653  2.2532 0.1059
+# Residuals 26 1923.01  73.962               
+
+
+# ANOVA Red_list_spp
+aov_bd=aov(data=data_bd, Red_list_spp~Ecosystem)
+anova(aov_bd)
+#           Df  Sum Sq Mean Sq F value Pr(>F)
+# Ecosystem  3 10.952  3.6508  3.9206 0.0172 *
+# Residuals 32 29.798  0.9312                
+
+model_tukey=TukeyHSD(aov_bd,  conf.level=.95)
+model_tukey$Ecosystem[which(model_tukey$Ecosystem[,4]<0.05),]
+
+#                    diff         lwr        upr     p adj
+# River-Forest    1.33333333  0.02610101 2.64056566 0.0442305
+
+
+# ANOVA Spp_PH
+aov_bd=aov(data=data_bd, Spp_PH~Ecosystem)
+anova(aov_bd)
+#           Df  Sum Sq Mean Sq F value Pr(>F)
+# Ecosystem  3 40.821 13.6071  5.3486 0.005273 **
+# Residuals 26 66.145  2.5441    
+
+model_tukey=TukeyHSD(aov_bd,  conf.level=.95)
+model_tukey$Ecosystem[which(model_tukey$Ecosystem[,4]<0.05),]
+
+#                    diff         lwr        upr     p adj
+# Urban-River   -2.363636 -4.5843485 -0.1429242 0.03385134
+# Wetland-Urban  3.363636  0.5136235  6.2136493 0.01624500
+
+
+# ANOVA Spp_PH
+aov_bd=aov(data=data_bd, PH_species ~Ecosystem)
+anova(aov_bd)
+#           Df  Sum Sq Mean Sq F value Pr(>F)
+# Ecosystem  3  6.2061  2.0687  1.9445 0.1472
+# Residuals 26 27.6606  1.0639               
+
+
+
+# ANOVA PH_targeted
+aov_bd=aov(data=data_bd, PH_targeted ~Ecosystem)
+anova(aov_bd)
+#           Df  Sum Sq Mean Sq F value Pr(>F)
+# Ecosystem  3    104  34.667  17.067 8.458e-07 ***
+# Residuals 32     65   2.031     
+
+model_tukey=TukeyHSD(aov_bd,  conf.level=.95)
+model_tukey$Ecosystem[which(model_tukey$Ecosystem[,4]<0.05),]
+
+#                 diff       lwr       upr        p adj
+# River-Forest    3.75  1.819283  5.680717 5.279490e-05
+# Wetland-Forest  3.50  1.270600  5.729400 9.385833e-04
+# Urban-River    -4.00 -5.884187 -2.115813 1.284018e-05
+# Wetland-Urban   3.75  1.560772  5.939228 3.143793e-04
+```
+
+
+# Tests WBGT 
+
+```{r}
+# Floods
+shapiro.test(data$Avrg_WGTB_before) # p-value = 9.595e-14 non-normal distribution
+shapiro.test(data$Avrg_WGTB_after) # p-value = 7.141e-14 non-normal distribution
+Shapidatabef=data.frame(Type=NA, Shapi=NA)
+Shapidataaft=data.frame(Type=NA, Shapi=NA)
+for (i in 1:nlevels(data$TYPE1)){
+  if (nrow(data[which(data$TYPE1==levels(data$TYPE1)[i]),]) >2){
+  shapibef=shapiro.test(data$Avrg_WGTB_before[which(data$TYPE1==levels(data$TYPE1)[i])])
+  shapiaft=shapiro.test(data$Avrg_WGTB_after[which(data$TYPE1==levels(data$TYPE1)[i])])
+  Shapidatabef[i,]=c(levels(data$TYPE1)[i], shapibef$p.value)
+  Shapidataaft[i,]=c(levels(data$TYPE1)[i], shapiaft$p.value)
+}
+  }
+
+# Shapidatabef$Shapi<0.05
+ # FALSE  TRUE FALSE FALSE
+# Shapidataaft$Shapi<0.05
+ # FALSE  TRUE FALSE FALSE
+
+# => non-normal distribution
+
+## By TYPE2
+
+wilcoxdata=data.frame(Type=NA, wilcox=NA, dir=NA)
+for (i in 1:nlevels(data$TYPE2)){
+  wilcox_exact=data.frame(Values=c(data$Avrg_WGTB_before[which(data$TYPE2==levels(data$TYPE2)[i])], 
+                          data$Avrg_WGTB_after[which(data$TYPE2==levels(data$TYPE2)[i])]),
+                          Intervention=factor(rep(c("Before", "After"), each = nrow(data[which(data$TYPE2==levels(data$TYPE2)[i]),]))),
+                          Block=factor(rep(1:nrow(data[which(data$TYPE2==levels(data$TYPE2)[i]),]), 2)))
+  if (nrow(data[which(data$TYPE2==levels(data$TYPE2)[i]),]) >2){
+    if (FALSE %in% c(data$Avrg_WGTB_before[which(data$TYPE2==levels(data$TYPE2)[i])]==data$Avrg_WGTB_after[which(data$TYPE2==levels(data$TYPE2)[i])])){
+    wilcoxtest=wilcox_test(data=wilcox_exact, Values~Intervention|Block) # p-value = 2.184e-05
+    dir=-1
+      if (median(data$Avrg_WGTB_after[which(data$TYPE2==levels(data$TYPE2)[i])], na.rm=T)>
+          median(data$Avrg_WGTB_before[which(data$TYPE2==levels(data$TYPE2)[i])], na.rm=T)){dir=1}
+  
+    if (pvalue(wilcoxtest) > 0.1) {dir=0}
+    
+    wilcoxdata[i,]=c(levels(data$TYPE2)[i], pvalue(wilcoxtest), dir)
+    }
+    if (sum(data$Avrg_WGTB_before[which(data$TYPE2==levels(data$TYPE2)[i])]-data$Avrg_WGTB_after[which(data$TYPE2==levels(data$TYPE2)[i])])==0){
+      wilcoxdata[i,]=c(levels(data$TYPE2)[i], 1, 0)
+    }
+    }
+  }
+
+wilcoxdata
+wilcoxdata$wilcox=as.numeric(wilcoxdata$wilcox)
+wilcoxdata$signif=NA
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.1)]="*"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.05)]="**"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.01)]="***"
+
+wilcoxdata$wilcox=round(as.numeric(wilcoxdata$wilcox), 4)
+
+write.csv2(wilcoxdata, "Posit/Export/wilcox_bef_aft_exact_results_TYPE2_WBGT.csv")
+
+
+## by Type 1 
+
+
+wilcoxdata=data.frame(Type=NA, wilcox=NA, dir=NA)
+for (i in 1:nlevels(data$TYPE1)){
+  wilcox_exact=data.frame(Values=c(data$Avrg_WGTB_before[which(data$TYPE1==levels(data$TYPE1)[i])], 
+                          data$Avrg_WGTB_after[which(data$TYPE1==levels(data$TYPE1)[i])]),
+                          Intervention=factor(rep(c("Before", "After"), each = nrow(data[which(data$TYPE1==levels(data$TYPE1)[i]),]))),
+                          Block=factor(rep(1:nrow(data[which(data$TYPE1==levels(data$TYPE1)[i]),]), 2)))
+  if (nrow(data[which(data$TYPE1==levels(data$TYPE1)[i]),]) >2){
+    if (FALSE %in% c(data$Avrg_WGTB_before[which(data$TYPE1==levels(data$TYPE1)[i])]==data$Avrg_WGTB_after[which(data$TYPE1==levels(data$TYPE1)[i])])){
+    wilcoxtest=wilcox_test(data=wilcox_exact, Values~Intervention|Block) # p-value = 2.184e-05
+    dir=-1
+      if (median(data$Avrg_WGTB_after[which(data$TYPE1==levels(data$TYPE1)[i])], na.rm=T)>
+          median(data$Avrg_WGTB_before[which(data$TYPE1==levels(data$TYPE1)[i])], na.rm=T)){dir=1}
+  
+    if (pvalue(wilcoxtest) > 0.1) {dir=0}
+    
+    wilcoxdata[i,]=c(levels(data$TYPE1)[i], pvalue(wilcoxtest), dir)
+    }
+    if (sum(data$Avrg_WGTB_before[which(data$TYPE1==levels(data$TYPE1)[i])]-data$Avrg_WGTB_after[which(data$TYPE1==levels(data$TYPE1)[i])])==0){
+      wilcoxdata[i,]=c(levels(data$TYPE1)[i], 1, 0)
+    }
+    }
+  }
+
+wilcoxdata
+wilcoxdata$wilcox=as.numeric(wilcoxdata$wilcox)
+wilcoxdata$signif=NA
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.1)]="*"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.05)]="**"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.01)]="***"
+
+wilcoxdata$wilcox=round(as.numeric(wilcoxdata$wilcox), 4)
+
+write.csv2(wilcoxdata, "Posit/Export/wilcox_bef_aft_exact_results_TYPE1_WBGT.csv")
+
+
+```
+
+# Tests GDP
+
+```{r}
+data_gdp=read.csv2("Posit/Data//NbS_list.csv")
+# data_gdp=data_bd[1:36,]
+str(data_gdp)
+data_gdp$TYPE1=as.factor(data_gdp$TYPE1)
+data_gdp$TYPE2=as.factor(data_gdp$TYPE2)
+summary(data_gdp)
+
+
+
+# ANOVA GDP TYPE1
+aov_gdp=aov(data=data_gdp, GDP_2021~TYPE1)
+anova(aov_gdp)
+#                  Df  Sum Sq Mean Sq F value Pr(>F)
+# TYPE1      3 1.9151e+16 6.3837e+15  5.5013 0.001749 **
+# Residuals 79 9.1672e+16 1.1604e+15                    
+
+model_tukey=TukeyHSD(aov_gdp,  conf.level=.95)
+model_tukey$TYPE1[which(model_tukey$TYPE1[,4]<0.05),]
+
+#                    diff         lwr       upr        p adj
+# Urban-Forest   31776459    928789.9  62624129 0.0409850101
+# Urban-River    37685676   5418989.7  69952363 0.0154429001
+# Wetland-Urban -43729744 -72518532.9 -14940955 0.0008409951
+
+
+# ANOVA GDP TYPE2
+aov_gdp=aov(data=data_gdp, GDP_2021~TYPE2)
+anova(aov_gdp)
+#                  Df  Sum Sq Mean Sq F value Pr(>F)
+# TYPE2      6 2.2176e+16 3.6960e+15  3.1687 0.00791 **
+# Residuals 76 8.8647e+16 1.1664e+15                   
+
+model_tukey=TukeyHSD(aov_gdp,  conf.level=.95)
+model_tukey$TYPE2[which(model_tukey$TYPE2[,4]<0.1),]
+
+#                                                                               diff         lwr       upr        p adj
+# Wetland restoration (Herbaceous)-Green urban area                             -42360307 -85336549 615934.1 0.05597505
+# Wetland restoration (Herbaceous)-Integration of green elements in urban areas -47015556 -94898482 867370.5 0.05765078
+
+
+
+```
+
+
+# Tests Runoff
+
+```{r}
+# Floods
+shapiro.test(data$rnf_rt_m3_bef) # p-value = 3.382e-15 non-normal distribution
+shapiro.test(data$rnf_rt_m3_aft) # p-value = 2.155e-15 non-normal distribution
+Shapidatabef=data.frame(Type=NA, Shapi=NA)
+Shapidataaft=data.frame(Type=NA, Shapi=NA)
+for (i in 1:nlevels(data$TYPE1)){
+  if (nrow(data[which(data$TYPE1==levels(data$TYPE1)[i]),]) >2){
+  shapibef=shapiro.test(data$rnf_rt_m3_bef[which(data$TYPE1==levels(data$TYPE1)[i])])
+  shapiaft=shapiro.test(data$rnf_rt_m3_aft[which(data$TYPE1==levels(data$TYPE1)[i])])
+  Shapidatabef[i,]=c(levels(data$TYPE1)[i], shapibef$p.value)
+  Shapidataaft[i,]=c(levels(data$TYPE1)[i], shapiaft$p.value)
+}
+  }
+
+# Shapidatabef$Shapi<0.05
+ # TRUE FALSE FALSE FALSE
+# Shapidataaft$Shapi<0.05
+ # TRUE FALSE FALSE FALSE
+
+# => non-normal distribution
+
+## By TYPE2
+
+wilcoxdata=data.frame(Type=NA, wilcox=NA, dir=NA)
+for (i in 1:nlevels(data$TYPE2)){
+  wilcox_exact=data.frame(Values=c(data$rnf_rt_m3_bef[which(data$TYPE2==levels(data$TYPE2)[i])], 
+                          data$rnf_rt_m3_aft[which(data$TYPE2==levels(data$TYPE2)[i])]),
+                          Intervention=factor(rep(c("Before", "After"), each = nrow(data[which(data$TYPE2==levels(data$TYPE2)[i]),]))),
+                          Block=factor(rep(1:nrow(data[which(data$TYPE2==levels(data$TYPE2)[i]),]), 2)))
+  if (nrow(data[which(data$TYPE2==levels(data$TYPE2)[i]),]) >2){
+    if (FALSE %in% c(data$rnf_rt_m3_bef[which(data$TYPE2==levels(data$TYPE2)[i])]==data$rnf_rt_m3_aft[which(data$TYPE2==levels(data$TYPE2)[i])])){
+    wilcoxtest=wilcox_test(data=wilcox_exact, Values~Intervention|Block) # p-value = 2.184e-05
+    dir=-1
+      if (median(data$rnf_rt_m3_aft[which(data$TYPE2==levels(data$TYPE2)[i])], na.rm=T)>
+          median(data$rnf_rt_m3_bef[which(data$TYPE2==levels(data$TYPE2)[i])], na.rm=T)){dir=1}
+  
+    if (pvalue(wilcoxtest) > 0.1) {dir=0}
+    
+    wilcoxdata[i,]=c(levels(data$TYPE2)[i], pvalue(wilcoxtest), dir)
+    }
+    if (sum(data$rnf_rt_m3_bef[which(data$TYPE2==levels(data$TYPE2)[i])]-data$rnf_rt_m3_aft[which(data$TYPE2==levels(data$TYPE2)[i])])==0){
+      wilcoxdata[i,]=c(levels(data$TYPE2)[i], 1, 0)
+    }
+    }
+  }
+
+wilcoxdata
+wilcoxdata$wilcox=as.numeric(wilcoxdata$wilcox)
+wilcoxdata$signif=NA
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.1)]="*"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.05)]="**"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.01)]="***"
+
+wilcoxdata$wilcox=round(as.numeric(wilcoxdata$wilcox), 4)
+
+write.csv2(wilcoxdata, "Posit/Export/wilcox_bef_aft_exact_results_TYPE2_runoff.csv")
+
+
+## by Type 1 
+
+wilcoxdata=data.frame(Type=NA, wilcox=NA, dir=NA)
+for (i in 1:nlevels(data$TYPE1)){
+  wilcox_exact=data.frame(Values=c(data$rnf_rt_m3_bef[which(data$TYPE1==levels(data$TYPE1)[i])], 
+                          data$rnf_rt_m3_aft[which(data$TYPE1==levels(data$TYPE1)[i])]),
+                          Intervention=factor(rep(c("Before", "After"), each = nrow(data[which(data$TYPE1==levels(data$TYPE1)[i]),]))),
+                          Block=factor(rep(1:nrow(data[which(data$TYPE1==levels(data$TYPE1)[i]),]), 2)))
+  if (nrow(data[which(data$TYPE1==levels(data$TYPE1)[i]),]) >2){
+    if (FALSE %in% c(data$rnf_rt_m3_bef[which(data$TYPE1==levels(data$TYPE1)[i])]==data$rnf_rt_m3_aft[which(data$TYPE1==levels(data$TYPE1)[i])])){
+    wilcoxtest=wilcox_test(data=wilcox_exact, Values~Intervention|Block) # p-value = 2.184e-05
+    dir=-1
+      if (median(data$rnf_rt_m3_aft[which(data$TYPE1==levels(data$TYPE1)[i])], na.rm=T)>
+          median(data$rnf_rt_m3_bef[which(data$TYPE1==levels(data$TYPE1)[i])], na.rm=T)){dir=1}
+  
+    if (pvalue(wilcoxtest) > 0.1) {dir=0}
+    
+    wilcoxdata[i,]=c(levels(data$TYPE1)[i], pvalue(wilcoxtest), dir)
+    }
+    if (sum(data$rnf_rt_m3_bef[which(data$TYPE1==levels(data$TYPE1)[i])]-data$rnf_rt_m3_aft[which(data$TYPE1==levels(data$TYPE1)[i])])==0){
+      wilcoxdata[i,]=c(levels(data$TYPE1)[i], 1, 0)
+    }
+    }
+  }
+
+wilcoxdata
+wilcoxdata$wilcox=as.numeric(wilcoxdata$wilcox)
+wilcoxdata$signif=NA
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.1)]="*"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.05)]="**"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.01)]="***"
+
+wilcoxdata$wilcox=round(as.numeric(wilcoxdata$wilcox), 4)
+
+write.csv2(wilcoxdata, "Posit/Export/wilcox_bef_aft_exact_results_TYPE1_runoff.csv")
+
+
+
+
+
+```
+
+# Tests Carbon
+
+
+```{r}
+data_c=read.csv2("Posit/Data/Carbon.csv")
+# data_c=data_c[,-grep("X", colnames(data_c))]
+str(data_c)
+data_c$TYPE1=as.factor(data_c$TYPE1)
+data_c$TYPE2=as.factor(data_c$TYPE2)
+
+data_c$Sum_carbon_before=as.numeric(data_c$Sum_carbon_before)
+data_c$Sum_carbon_after=as.numeric(data_c$Sum_carbon_after)
+
+shapiro.test(data_c$Sum_carbon_before) # p-value =  6.637e-15 non-normal distribution
+shapiro.test(data_c$Sum_carbon_after) # p-value = 4.578e-15 non-normal distribution
+Shapidatabef=data.frame(Type=NA, Shapi=NA)
+Shapidataaft=data.frame(Type=NA, Shapi=NA)
+for (i in 1:nlevels(data_c$TYPE1)){
+  if (nrow(data_c[which(data_c$TYPE1==levels(data_c$TYPE1)[i]),]) >2){
+  shapibef=shapiro.test(data_c$Sum_carbon_before[which(data_c$TYPE1==levels(data_c$TYPE1)[i])])
+  shapiaft=shapiro.test(data_c$Sum_carbon_after[which(data_c$TYPE1==levels(data_c$TYPE1)[i])])
+  Shapidatabef[i,]=c(levels(data_c$TYPE1)[i], shapibef$p.value)
+  Shapidataaft[i,]=c(levels(data_c$TYPE1)[i], shapiaft$p.value)
+}
+  }
+
+# Shapidatabef$Shapi<0.05
+ # TRUE FALSE FALSE FALSE
+# Shapidataaft$Shapi<0.05
+ # TRUE FALSE FALSE FALSE
+
+# => non-normal distribution
+
+## By TYPE2
+data_c_na=data_c[-which(is.na(data_c$Sum_carbon_before)),]
+wilcoxdata=data.frame(Type=NA, wilcox=NA, dir=NA)
+for (i in 1:nlevels(data_c_na$TYPE2)){
+  wilcox_exact=data.frame(Values=c(data_c_na$Sum_carbon_before[which(data_c_na$TYPE2==levels(data_c_na$TYPE2)[i])], 
+                          data_c_na$Sum_carbon_after[which(data_c_na$TYPE2==levels(data_c_na$TYPE2)[i])]),
+                          Intervention=factor(rep(c("Before", "After"), each = nrow(data_c_na[which(data_c_na$TYPE2==levels(data_c_na$TYPE2)[i]),]))),
+                          Block=factor(rep(1:nrow(data_c_na[which(data_c_na$TYPE2==levels(data_c_na$TYPE2)[i]),]), 2)))
+  if (nrow(data_c_na[which(data_c_na$TYPE2==levels(data_c_na$TYPE2)[i]),]) >2){
+    if (FALSE %in% c(data_c_na$Sum_carbon_before[which(data_c_na$TYPE2==levels(data_c_na$TYPE2)[i])]==data_c_na$Sum_carbon_after[which(data_c_na$TYPE2==levels(data_c_na$TYPE2)[i])])){
+    wilcoxtest=wilcox_test(data=wilcox_exact, Values~Intervention|Block) # p-value = 2.184e-05
+    dir=-1
+      if (median(data_c_na$Sum_carbon_after[which(data_c_na$TYPE2==levels(data_c_na$TYPE2)[i])], na.rm=T)>
+          median(data_c_na$Sum_carbon_before[which(data_c_na$TYPE2==levels(data_c_na$TYPE2)[i])], na.rm=T)){dir=1}
+  
+    if (pvalue(wilcoxtest) > 0.1) {dir=0}
+    
+    wilcoxdata[i,]=c(levels(data_c_na$TYPE2)[i], pvalue(wilcoxtest), dir)
+    }
+    if (sum(data_c_na$Sum_carbon_before[which(data_c_na$TYPE2==levels(data_c_na$TYPE2)[i])]-data_c_na$Sum_carbon_after[which(data_c_na$TYPE2==levels(data_c_na$TYPE2)[i])])==0){
+      wilcoxdata[i,]=c(levels(data_c_na$TYPE2)[i], 1, 0)
+    }
+    }
+  }
+
+wilcoxdata
+wilcoxdata$wilcox=as.numeric(wilcoxdata$wilcox)
+wilcoxdata$signif=NA
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.1)]="*"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.05)]="**"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.01)]="***"
+
+wilcoxdata$wilcox=round(as.numeric(wilcoxdata$wilcox), 4)
+
+write.csv2(wilcoxdata, "Posit/Export/wilcox_bef_aft_exact_results_TYPE2_carbon_sum.csv")
+
+
+## by Type 1 
+
+
+wilcoxdata=data.frame(Type=NA, wilcox=NA, dir=NA)
+for (i in 1:nlevels(data_c_na$TYPE1)){
+  wilcox_exact=data.frame(Values=c(data_c_na$Sum_carbon_before[which(data_c_na$TYPE1==levels(data_c_na$TYPE1)[i])], 
+                          data_c_na$Sum_carbon_after[which(data_c_na$TYPE1==levels(data_c_na$TYPE1)[i])]),
+                          Intervention=factor(rep(c("Before", "After"), each = nrow(data_c_na[which(data_c_na$TYPE1==levels(data_c_na$TYPE1)[i]),]))),
+                          Block=factor(rep(1:nrow(data_c_na[which(data_c_na$TYPE1==levels(data_c_na$TYPE1)[i]),]), 2)))
+  if (nrow(data_c_na[which(data_c_na$TYPE1==levels(data_c_na$TYPE1)[i]),]) >2){
+    if (FALSE %in% c(data_c_na$Sum_carbon_before[which(data_c_na$TYPE1==levels(data_c_na$TYPE1)[i])]==data_c_na$Sum_carbon_after[which(data_c_na$TYPE1==levels(data_c_na$TYPE1)[i])])){
+    wilcoxtest=wilcox_test(data=wilcox_exact, Values~Intervention|Block) # p-value = 2.184e-05
+    dir=-1
+      if (median(data_c_na$Sum_carbon_after[which(data_c_na$TYPE1==levels(data_c_na$TYPE1)[i])], na.rm=T)>
+          median(data_c_na$Sum_carbon_before[which(data_c_na$TYPE1==levels(data_c_na$TYPE1)[i])], na.rm=T)){dir=1}
+  
+    if (pvalue(wilcoxtest) > 0.1) {dir=0}
+    
+    wilcoxdata[i,]=c(levels(data_c_na$TYPE1)[i], pvalue(wilcoxtest), dir)
+    }
+    if (sum(data_c_na$Sum_carbon_before[which(data_c_na$TYPE1==levels(data_c_na$TYPE1)[i])]-data_c_na$Sum_carbon_after[which(data_c_na$TYPE1==levels(data_c_na$TYPE1)[i])])==0){
+      wilcoxdata[i,]=c(levels(data_c_na$TYPE1)[i], 1, 0)
+    }
+    }
+  }
+
+wilcoxdata
+wilcoxdata$wilcox=as.numeric(wilcoxdata$wilcox)
+wilcoxdata$signif=NA
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.1)]="*"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.05)]="**"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.01)]="***"
+
+wilcoxdata$wilcox=round(as.numeric(wilcoxdata$wilcox), 4)
+
+write.csv2(wilcoxdata, "Posit/Export/wilcox_bef_aft_exact_results_TYPE1_carbon_sum.csv")
+
+
+```
+
+
+# Tests Landslides 
+
+```{r}
+
+shapiro.test(data$Deg_prot_bef) # p-value < 2.2e-16 non-normal distribution
+shapiro.test(data$Deg_prot_after) # p-value = 3.483e-15 non-normal distribution
+
+## By TYPE2
+wilcoxdata=data.frame(Type=NA, wilcox=NA, dir=NA)
+for (i in 1:nlevels(data$TYPE2)){
+  wilcox_exact=data.frame(Values=c(data$Deg_prot_bef[which(data$TYPE2==levels(data$TYPE2)[i])], 
+                          data$Deg_prot_after[which(data$TYPE2==levels(data$TYPE2)[i])]),
+                          Intervention=factor(rep(c("Before", "After"), each = nrow(data[which(data$TYPE2==levels(data$TYPE2)[i]),]))),
+                          Block=factor(rep(1:nrow(data[which(data$TYPE2==levels(data$TYPE2)[i]),]), 2)))
+  if (nrow(data[which(data$TYPE2==levels(data$TYPE2)[i]),]) >2){
+    if (FALSE %in% c(data$Deg_prot_bef[which(data$TYPE2==levels(data$TYPE2)[i])]==data$Deg_prot_after[which(data$TYPE2==levels(data$TYPE2)[i])])){
+    wilcoxtest=wilcox_test(data=wilcox_exact, Values~Intervention|Block) # p-value = 2.184e-05
+    dir=-1
+      if (median(data$Deg_prot_after[which(data$TYPE2==levels(data$TYPE2)[i])], na.rm=T)>
+          median(data$Deg_prot_bef[which(data$TYPE2==levels(data$TYPE2)[i])], na.rm=T)){dir=1}
+  
+    if (pvalue(wilcoxtest) > 0.1) {dir=0}
+    
+    wilcoxdata[i,]=c(levels(data$TYPE2)[i], pvalue(wilcoxtest), dir)
+    }
+    if (sum(data$Deg_prot_bef[which(data$TYPE2==levels(data$TYPE2)[i])]-data$Deg_prot_after[which(data$TYPE2==levels(data$TYPE2)[i])])==0){
+      wilcoxdata[i,]=c(levels(data$TYPE2)[i], 1, 0)
+    }
+    }
+  }
+
+wilcoxdata
+wilcoxdata$wilcox=as.numeric(wilcoxdata$wilcox)
+wilcoxdata$signif=NA
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.1)]="*"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.05)]="**"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.01)]="***"
+
+wilcoxdata$wilcox=round(as.numeric(wilcoxdata$wilcox), 4)
+
+write.csv2(wilcoxdata, "Posit/Export/wilcox_bef_aft_exact_results_TYPE2_deg_prot_landslides.csv")
+
+
+## By Type 1 
+wilcoxdata=data.frame(Type=NA, wilcox=NA, dir=NA)
+for (i in 1:nlevels(data$TYPE1)){
+  wilcox_exact=data.frame(Values=c(data$Deg_prot_bef[which(data$TYPE1==levels(data$TYPE1)[i])], 
+                          data$Deg_prot_after[which(data$TYPE1==levels(data$TYPE1)[i])]),
+                          Intervention=factor(rep(c("Before", "After"), each = nrow(data[which(data$TYPE1==levels(data$TYPE1)[i]),]))),
+                          Block=factor(rep(1:nrow(data[which(data$TYPE1==levels(data$TYPE1)[i]),]), 2)))
+  if (nrow(data[which(data$TYPE1==levels(data$TYPE1)[i]),]) >2){
+    if (FALSE %in% c(data$Deg_prot_bef[which(data$TYPE1==levels(data$TYPE1)[i])]==data$Deg_prot_after[which(data$TYPE1==levels(data$TYPE1)[i])])){
+    wilcoxtest=wilcox_test(data=wilcox_exact, Values~Intervention|Block) # p-value = 2.184e-05
+    dir=-1
+      if (median(data$Deg_prot_after[which(data$TYPE1==levels(data$TYPE1)[i])], na.rm=T)>
+          median(data$Deg_prot_bef[which(data$TYPE1==levels(data$TYPE1)[i])], na.rm=T)){dir=1}
+  
+    if (pvalue(wilcoxtest) > 0.1) {dir=0}
+    
+    wilcoxdata[i,]=c(levels(data$TYPE1)[i], pvalue(wilcoxtest), dir)
+    }
+    if (sum(data$Deg_prot_bef[which(data$TYPE1==levels(data$TYPE1)[i])]-data$Deg_prot_after[which(data$TYPE1==levels(data$TYPE1)[i])])==0){
+      wilcoxdata[i,]=c(levels(data$TYPE1)[i], 1, 0)
+    }
+    }
+  }
+
+wilcoxdata
+wilcoxdata$wilcox=as.numeric(wilcoxdata$wilcox)
+wilcoxdata$signif=NA
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.1)]="*"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.05)]="**"
+wilcoxdata$signif[which(wilcoxdata$wilcox<0.01)]="***"
+
+wilcoxdata$wilcox=round(as.numeric(wilcoxdata$wilcox), 4)
+
+write.csv2(wilcoxdata, "Posit/Export/wilcox_bef_aft_exact_results_TYPE1_deg_prot_landslides.csv")
+
+
+
+
+
+```
+
+# Tests Economic values
+
+## Total value EUR
+
+```{r}
+str(data_gdp)
+
+# ANOVA total value 
+## Type 1
+aov_gdp=aov(data=data_gdp, Tot_value_EUR~TYPE1)
+anova(aov_gdp)
+#                  Df  Sum Sq Mean Sq F value Pr(>F)
+# TYPE1      3 1.1374e+16 3.7913e+15  1.1791 0.3231
+# Residuals 79 2.5403e+17 3.2155e+15               
+
+## Type 2 
+
+aov_gdp=aov(data=data_gdp, Tot_value_EUR~TYPE2)
+anova(aov_gdp)
+# TYPE2      6 1.1675e+16 1.9459e+15  0.5829 0.7429
+# Residuals 76 2.5372e+17 3.3385e+15               
+
+
+### Total value hectares
+## Type 1 
+aov_gdp=aov(data=data_gdp, Tot_value_ha_EUR~TYPE1)
+anova(aov_gdp)
+
+# TYPE1      3 1.0052e+14 3.3507e+13  1.4227 0.2424
+# Residuals 79 1.8606e+15 2.3552e+13               
+
+### Type 2 
+aov_gdp=aov(data=data_gdp, Tot_value_ha_EUR~TYPE2)
+anova(aov_gdp)
+# TYPE2      6 1.0080e+14 1.6801e+13  0.6864 0.6612
+# Residuals 76 1.8603e+15 2.4478e+13               
+
+
+```
+
+
+## Cost-effectiveness
+
+```{r}
+str(data_gdp)
+
+# ANOVA Cost_eff_tot
+## Type 1
+aov_gdp=aov(data=data_gdp, Cost_eff_tot~TYPE1)
+anova(aov_gdp)
+#                  Df  Sum Sq Mean Sq F value Pr(>F)
+# TYPE1      3  254093   84698   1.121 0.3457
+# Residuals 79 5969051   75558               
+
+## Type 2 
+
+aov_gdp=aov(data=data_gdp, Cost_eff_tot~TYPE2)
+anova(aov_gdp)
+# TYPE2      6  263333   43889  0.5597  0.761
+# Residuals 76 5959811   78419               
+
+
+
+```
+
+
+## Monetary per ES
+```{r}
+#### Heatwaves
+heatwaves=read.csv2("Posit/Data/Heatwaves.csv")
+str(heatwaves)
+
+heatwaves$TYPE1=as.factor(heatwaves$TYPE1)
+heatwaves$TYPE2=as.factor(heatwaves$TYPE2)
+
+heatwaves$Economic_value=as.numeric(heatwaves$Economic_value)
+
+# p=ggplot(heatwaves) + geom_violin(aes(x=TYPE1,y=Economic_value, fill=TYPE1))
+
+
+p=ggplot(heatwaves) + geom_point(aes(y=Economic_value, x=TYPE1, col=TYPE1), position = position_jitter(width = 0.2)) +  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+fx(p)
+ggsave(plot=p, "Posit/Export/Figures/points_economic_heatwave_TYPE1.png", width=4*2, height=10*2, limitsize=F, dpi = 300)
+
+
+p=ggplot(heatwaves) + geom_point(aes(y=Economic_value, x=TYPE2, col=TYPE2), position = position_jitter(width = 0.2)) +  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+fx(p)
+ggsave(plot=p, "Posit/Export/Figures/points_economic_heatwave_TYPE2.png", width=4*2, height=10*2, limitsize=F, dpi = 300)
+
+
+# Anova type1
+aov_hw=aov(data=heatwaves, Economic_value~TYPE1)
+anova(aov_hw)
+#           Df     Sum Sq    Mean Sq F value   Pr(>F)   
+# TYPE1      3 6.8722e+12 2.2907e+12  6.1957 0.0007785 ***
+# Residuals 79 2.9209e+13 3.6973e+11                      
+
+model_tukey=TukeyHSD(aov_hw, conf.level=.95)
+model_tukey$TYPE1[which(model_tukey$TYPE1[,4]<0.05),]
+#                    diff        lwr       upr        p adj
+# Urban-Forest   706418.1   155785.4 1257050.8 0.0063362495
+# Urban-River    706913.4   130951.2 1282875.6 0.0098258256
+# Wetland-Urban -817729.4 -1331611.0 -303847.9 0.0004331157
+
+write.csv2(model_tukey$TYPE1[which(model_tukey$TYPE1[,4]<0.05),], "Posit/Export/heatwave_economic_signif_type1.csv")
+
+
+# Anova Type 2 
+
+aov_hw=aov(data=heatwaves, Economic_value~TYPE2)
+anova(aov_hw)
+#           Df     Sum Sq    Mean Sq F value   Pr(>F)   
+# TYPE2      6 7.9178e+12 1.3196e+12  3.5611 0.003671 **
+# Residuals 76 2.8163e+13 3.7057e+11                    
+
+model_tukey=TukeyHSD(aov_hw, conf.level=.95)
+model_tukey$TYPE2[which(model_tukey$TYPE2[,4]<0.05),]
+#                    diff        lwr       upr        p adj
+# Integration of green elements in urban areas-Active forest plantation/restoration  1086657.9   150936.9 2022379.0 0.012536540
+# River restoration -Integration of green elements in urban areas                    -975841.9 -1851345.1 -100338.7 0.019093204
+# Wetland restoration (Forested)-Integration of green elements in urban areas       -1086657.9 -2038748.5 -134567.4 0.015035477
+# Wetland restoration (Herbaceous)-Integration of green elements in urban areas     -1086657.9 -1940132.3 -233183.5 0.004309749
+
+write.csv2(model_tukey$TYPE2[which(model_tukey$TYPE2[,4]<0.05),], "Posit/Export/heatwave_economic_signif_type2.csv")
+
+#### Carbon
+carbon=read.csv2("Posit/Data/Carbon.csv")
+str(carbon)
+
+carbon$TYPE1=as.factor(carbon$TYPE1)
+carbon$TYPE2=as.factor(carbon$TYPE2)
+# carbon=carbon[-which(is.na(carbon$Type)),]
+carbon$Economic_value=as.numeric(carbon$Economic_value)
+# p=ggplot(carbon) + geom_violin(aes(x=Type,y=Economic_value, fill=Type))
+
+p=ggplot(carbon) + geom_point(aes(y=Economic_value, x=TYPE1, col=TYPE1), position = position_jitter(width = 0.2)) +  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+fx(p)
+ggsave(plot=p, "Posit/Export/Figures/points_economic_carbon_type1.png", width=4*2, height=10*2, limitsize=F, dpi = 300)
+
+p=ggplot(carbon) + geom_point(aes(y=Economic_value, x=TYPE2, col=TYPE2), position = position_jitter(width = 0.2)) +  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+fx(p)
+ggsave(plot=p, "Posit/Export/Figures/points_economic_carbon_type2.png", width=4*2, height=10*2, limitsize=F, dpi = 300)
+
+
+# Anova type 1
+aov_co2=aov(data=carbon, Economic_value~TYPE1)
+anova(aov_co2)
+#           Df     Sum Sq    Mean Sq F value   Pr(>F)   
+# TYPE1      3 1.4333e+13 4.7776e+12   5.214 0.002454 **
+# Residuals 79 7.2388e+13 9.1630e+11                    
+
+
+model_tukey=TukeyHSD(aov_co2, conf.level=.95)
+model_tukey$TYPE1[which(model_tukey$TYPE1[,4]<0.05),]
+#                     diff      lwr       upr       p adj
+# River-Forest   -976632.6 -1796296 -156969.2 0.012936161
+# Urban-Forest   -977450.5 -1844289 -110612.0 0.020772485
+# Wetland-Forest -932708.2 -1642758 -222658.0 0.004942415
+
+write.csv2(model_tukey$TYPE1[which(model_tukey$TYPE1[,4]<0.05),], "Posit/Export/carbon_economic_signif_type1.csv")
+
+# Anova type 2
+aov_co2=aov(data=carbon, Economic_value~TYPE2)
+anova(aov_co2)
+#           Df     Sum Sq    Mean Sq F value   Pr(>F)   
+# TYPE2      6 2.5378e+13 4.2296e+12  5.2403 0.0001461 ***
+# Residuals 76 6.1343e+13 8.0714e+11                      
+
+
+model_tukey=TukeyHSD(aov_co2, conf.level=.95)
+model_tukey$TYPE2[which(model_tukey$TYPE2[,4]<0.05),]
+#                                                                                      diff      lwr       upr       p adj
+# Forest plantation/restoration-Active forest plantation/restoration                -1446216 -2635124 -257307.8 7.484340e-03
+# Green urban area-Active forest plantation/restoration                             -1619272 -2883631 -354913.0 4.001340e-03
+# Integration of green elements in urban areas-Active forest plantation/restoration -1728595 -3109575 -347614.8 5.323735e-03
+# River restoration -Active forest plantation/restoration                           -1665307 -2718221 -612392.1 1.589818e-04
+# Wetland restoration (Forested)-Active forest plantation/restoration               -1564118 -2753027 -375210.5 2.819130e-03
+# Wetland restoration (Herbaceous)-Active forest plantation/restoration             -1648651 -2661405 -635896.9 9.340678e-05
+
+write.csv2(model_tukey$TYPE2[which(model_tukey$TYPE2[,4]<0.05),], "Posit/Export/carbon_economic_signif_type2.csv")
+
+#### Floods
+
+floods=read.csv2("Posit/Data/Floods.csv")
+str(floods)
+floods$TYPE1=as.factor(floods$TYPE1)
+floods$TYPE2=as.factor(floods$TYPE2)
+# floods=floods[-which(is.na(floods$Type)),]
+floods$Economic_value=as.numeric(floods$Economic_value)
+
+# p=ggplot(floods) + geom_violin(aes(x=Type,y=Economic_value, fill=Type))
+
+p=ggplot(floods) + geom_point(aes(y=Economic_value, x=TYPE1, col=TYPE1), position = position_jitter(width = 0.2)) +  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+fx(p)
+# log
+p=ggplot(floods) + geom_point(aes(y=log10(Economic_value+1), x=TYPE1, col=TYPE1), position = position_jitter(width = 0.2)) +  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+fx(p)
+ggsave(plot=p, "Posit/Export/Figures/points_economic_floods_type1_log.png", width=4*2, height=10*2, limitsize=F, dpi = 300)
+
+p=ggplot(floods) + geom_point(aes(y=log10(Economic_value+1), x=TYPE2, col=TYPE2), position = position_jitter(width = 0.2)) +  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+fx(p)
+ggsave(plot=p, "Posit/Export/Figures/points_economic_floods_type2_log.png", width=4*2, height=10*2, limitsize=F, dpi = 300)
+
+
+
+# Anova type 1
+aov_fm=aov(data=floods, Economic_value~TYPE1)
+anova(aov_fm)
+#           Df     Sum Sq    Mean Sq F value   Pr(>F)   
+# TYPE1      3 1.9036e+16 6.3455e+15  1.0731 0.3711
+# Residuals 41 2.4245e+17 5.9134e+15               
+
+# Anova type 2
+aov_fm=aov(data=floods, Economic_value~TYPE2)
+anova(aov_fm)
+
+#           Df     Sum Sq    Mean Sq F value Pr(>F)
+# TYPE2      6 1.9356e+16 3.2259e+15  0.5063 0.7997
+# Residuals 38 2.4213e+17 6.3719e+15               
+
+### Landslides
+landslides=read.csv2("Posit/Data/Landslides.csv")
+str(landslides)
+landslides$TYPE1=as.factor(landslides$TYPE1)
+landslides$TYPE2=as.factor(landslides$TYPE2)
+# landslides=landslides[-which(is.na(landslides$Type)),]
+landslides$Economic_value_20m=as.numeric(landslides$Economic_value_20m)
+landslides$Economic_value_65m=as.numeric(landslides$Economic_value_65m)
+landslides$Economic_value_200m=as.numeric(landslides$Economic_value_200m)
+
+
+# p=ggplot(landslides) + geom_violin(aes(x=Type,y=Economic_value_20m, fill=Type))
+p=ggplot(landslides) + geom_point(aes(y=Economic_value_20m, x=TYPE1, col=TYPE1), position = position_jitter(width = 0.2)) +  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+fx(p)
+# log 20m
+p=ggplot(landslides) + geom_point(aes(y=log10(Economic_value_20m+1), x=TYPE1, col=TYPE1), position = position_jitter(width = 0.2)) +  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+fx(p)
+ggsave(plot=p, "Posit/Export/Figures/points_economic_landslides_20m_type1_log.png", width=4*2, height=10*2, limitsize=F, dpi = 300)
+# log 65m
+p=ggplot(landslides) + geom_point(aes(y=log10(Economic_value_65m+1), x=TYPE1, col=TYPE1), position = position_jitter(width = 0.2)) +  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+fx(p)
+ggsave(plot=p, "Posit/Export/Figures/points_economic_landslides_65m_type1_log.png", width=4*2, height=10*2, limitsize=F, dpi = 300)
+# log 200m
+p=ggplot(landslides) + geom_point(aes(y=log10(Economic_value_200m+1), x=TYPE1, col=TYPE1), position = position_jitter(width = 0.2)) +  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+fx(p)
+ggsave(plot=p, "Posit/Export/Figures/points_economic_landslides_200m_type1_log.png", width=4*2, height=10*2, limitsize=F, dpi = 300)
+
+# type 2
+# log 20m
+p=ggplot(landslides) + geom_point(aes(y=log10(Economic_value_20m+1), x=TYPE2, col=TYPE2), position = position_jitter(width = 0.2)) +  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+fx(p)
+ggsave(plot=p, "Posit/Export/Figures/points_economic_landslides_20m_type2_log.png", width=4*2, height=10*2, limitsize=F, dpi = 300)
+# log 65m
+p=ggplot(landslides) + geom_point(aes(y=log10(Economic_value_65m+1), x=TYPE2, col=TYPE2), position = position_jitter(width = 0.2)) +  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+fx(p)
+ggsave(plot=p, "Posit/Export/Figures/points_economic_landslides_65m_type2_log.png", width=4*2, height=10*2, limitsize=F, dpi = 300)
+# log 200m
+p=ggplot(landslides) + geom_point(aes(y=log10(Economic_value_200m+1), x=TYPE2, col=TYPE2), position = position_jitter(width = 0.2)) +  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+fx(p)
+ggsave(plot=p, "Posit/Export/Figures/points_economic_landslides_200m_type2_log.png", width=4*2, height=10*2, limitsize=F, dpi = 300)
+
+
+# Anova 20m type 1
+aov_l20=aov(data=landslides, Economic_value_20m~TYPE1)
+anova(aov_l20)
+#           Df     Sum Sq    Mean Sq F value   Pr(>F)   
+# TYPE1      3 1.3854e+12 4.6179e+11  2.6639 0.05358 .
+# Residuals 79 1.3695e+13 1.7335e+11                  
+
+# Anova 20m type 2
+aov_l20=aov(data=landslides, Economic_value_20m~TYPE2)
+anova(aov_l20)
+#           Df     Sum Sq    Mean Sq F value   Pr(>F)   
+# TYPE2      6 1.5603e+12 2.6005e+11  1.4618 0.2027
+# Residuals 76 1.3520e+13 1.7789e+11               
+ 
+
+# Anova 65m type 1
+aov_l65=aov(data=landslides, Economic_value_65m~TYPE1)
+anova(aov_l65)
+
+#           Df     Sum Sq    Mean Sq F value Pr(>F)
+# TYPE1      3 2.6004e+13 8.6680e+12  3.6763 0.01554 *
+# Residuals 79 1.8626e+14 2.3578e+12                  
+
+tukey_model=TukeyHSD(aov_l65)
+tukey_model$TYPE1[which(tukey_model$TYPE1[,4]<0.1),]
+
+#                    diff      lwr       upr      p adj
+# River-Forest   -1287518 -2602342   27306.0 0.05716823
+# Urban-Forest   -1287518 -2678016  102979.8 0.07965219
+# Wetland-Forest -1287518 -2426511 -148524.9 0.02035567
+
+write.csv2(tukey_model$TYPE1[which(tukey_model$TYPE1[,4]<0.1),], "Posit/Export/landslides_economic_65m_signif_type1.csv")
+
+
+# Anova 65m type 2
+aov_l65=aov(data=landslides, Economic_value_65m~TYPE2)
+anova(aov_l65)
+
+#           Df     Sum Sq    Mean Sq F value Pr(>F)
+# TYPE2      6 2.7924e+13 4.6541e+12  1.9187 0.0885 .
+# Residuals 76 1.8434e+14 2.4256e+12                 
+
+
+# Anova 200m type 1
+aov_l200=aov(data=landslides, Economic_value_200m~TYPE1)
+anova(aov_l200)
+#           Df     Sum Sq    Mean Sq F value   Pr(>F)   
+# TYPE1      3 1.2724e+15 4.2412e+14  4.3136 0.007186 **
+# Residuals 79 7.7676e+15 9.8323e+13                    
+
+tukey_model=TukeyHSD(aov_l200)
+tukey_model$TYPE1[which(tukey_model$TYPE1[,4]<0.05),]
+
+#                    diff      lwr       upr      p adj
+# River-Forest   -9006299 -17497012  -515585.05 0.03330170
+# Urban-Forest   -9006299 -17985689   -26908.15 0.04903218
+# Wetland-Forest -9006055 -16361309 -1650801.12 0.01005098
+
+write.csv2(tukey_model$TYPE1[which(tukey_model$TYPE1[,4]<0.05),], "Posit/Export/landslides_economic_200m_signif_type1.csv")
+
+
+# Anova 200m type 2
+aov_l200=aov(data=landslides, Economic_value_200m~TYPE2)
+anova(aov_l200)
+#           Df     Sum Sq    Mean Sq F value   Pr(>F)   
+# TYPE2      6 1.2757e+15 2.1262e+14  2.0812 0.06518 .
+# Residuals 76 7.7642e+15 1.0216e+14                  
+
+
+
+
+```
